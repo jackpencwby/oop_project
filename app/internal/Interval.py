@@ -1,5 +1,5 @@
 class Interval:
-    def __init__(self, begin, end) -> None:
+    def __init__(self, begin, end):
         self.__begin_datetime = begin
         self.__end_datetime = end
 
