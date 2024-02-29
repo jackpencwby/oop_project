@@ -1,5 +1,5 @@
 from ..internal.Company import Company
-from user import *
+from .user import *
 
 company = Company(name="marriot")
 

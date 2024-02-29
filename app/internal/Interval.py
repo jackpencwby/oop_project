@@ -6,7 +6,7 @@ class Interval:
     def get_begin_datetime(self):
         return self.__begin_datetime
 
-    def get_end_date_time(self):
+    def get_end_datetime(self):
         return self.__end_datetime
 
     def is_intersect_to(self, interval):
