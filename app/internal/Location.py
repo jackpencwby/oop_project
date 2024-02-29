@@ -1,10 +1,10 @@
 class Location:
-    def __init__(self, province, district):
+    def __init__(self, country, province):
+        self.__country = country
         self.__province = province
-        self.__district = district
+
+    def get_country(self):
+        return self.__country
 
     def get_province(self):
         return self.__province
-    
-    def get_district(self):
-        return self.__district

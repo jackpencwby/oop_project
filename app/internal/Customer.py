@@ -19,6 +19,16 @@ class Customer(Person):
     def add_booking(self, booking):
         # validation
         self.__booking_list.append(booking)
+
+    def get_personal_information(self):
+        return {"firstname": self.__firstname,
+                "lastname": self.__lastname,
+                "email": self.__account.get_email(),
+                "country": self.__country,
+                "province": self.__province,
+                "zip_code": self.__zip_code,
+                "birthday": self.__birthday,
+                "phone_number": self.__phone_number}
     
     def booking(self):
         pass

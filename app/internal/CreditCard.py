@@ -7,5 +7,6 @@ class CreditCard:
     
     def get_card_id(self):
         return self.__card_id
+    
     def get_key(self):
         return self.__key
