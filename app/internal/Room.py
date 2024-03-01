@@ -35,7 +35,8 @@ class Room:
                 return False
         return True
 
-    # def add_pending_interval(self, interval):
-    #     self.__pending_interval.append(interval)
+    def add_pending_interval(self, interval):
+        self.__pending_interval.append(interval)
+        return 'done'
 
     

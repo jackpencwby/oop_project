@@ -9,11 +9,14 @@ from datetime import date as Date
 
 class Interval:
     def __init__(self, begin, end):
-        self.__begin_datetime = begin   #Date object
-        self.__end_datetime = end       #Date object
+        self.__begin_date = begin   #Date object
+        self.__end_date = end       #Date object
 
     def get_begin_date(self):
-        return self.__begin_datetime
+        return self.__begin_date
 
     def get_end_date(self):
-        return self.__end_datetime
+        return self.__end_date
+    
+    def get_night(self):
+        return (self.__end_date - self.__begin_date).days

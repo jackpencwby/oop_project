@@ -44,14 +44,18 @@ class Hotel:
                         break
         return available_room
     
-    # def select_room(self, interval, room_type, amount):
-    #     for room in self.__room_list:
-    #         if room.get_type() == room_type:
-    #             amount -= 1
-    #             room.add_pending_interval(interval)
-    #         if amount == 0:
-    #             return 'done'
+    def select_room(self, interval, amount, room_type):
+        for room in self.__room_list:
+            if room.get_type() == room_type and room.is_available_at(interval):
+                amount -= 1
+                room.add_pending_interval(interval)
+            if amount == 0:
+                return 'done'
 
+    def get_room_by_type(self, type):
+        for room in self.__room_list:
+            if room.get_type() == type:
+                return room
 
     def get_opinion(self):
         return self.__opinion_list

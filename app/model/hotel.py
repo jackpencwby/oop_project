@@ -1,14 +1,6 @@
-from pydantic import BaseModel
-from datetime import date as Date
-from ..internal.Location import Location
-from ..internal.Interval import Interval
+# from pydantic import BaseModel
+# from ..internal.Location import Location
 
-class HotelModel(BaseModel):
-    name: str
-    location: str
-    status: None
-    room_list: list
-    
-class IntervalModel(BaseModel):
-    begin: Date
-    end: Date
+# class HotelModel(BaseModel):
+#     name: str
+#     location: Location

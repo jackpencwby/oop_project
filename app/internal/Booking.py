@@ -6,7 +6,7 @@ class Booking:
         self.__room_type = room_type
         self.__room_quantity = room_quantity
         self.__interval = interval   
-        self.__status = status  #3 status: cancel, pending, paid
+        self.__status = status  #3 status: cancelled, pending, wait_for_checkin, wait_for_checkout
 
     def get_firstname(self):
         return self.__firstname
