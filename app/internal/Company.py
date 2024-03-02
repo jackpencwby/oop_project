@@ -1,10 +1,15 @@
+from fastapi import HTTPException, status
+from fastapi.responses import JSONResponse
+from datetime import date as Date
 from .Customer import Customer
 from .Account import Account
-from .Hotel import Hotel
-from .Room import Room
-from .Booking import Booking
 from .Interval import Interval
-from datetime import date as Date
+
+from .Booking import Booking
+from .CreditCardTransaction import CreditCardTransaction
+from .MobileBankTransaction import MobileBankTransaction
+from .PaypalTransaction import PaypalTransaction
+
 from ..utils.dependency import set_current_user
 
 class Company:
@@ -12,6 +17,8 @@ class Company:
         self.__name = name
         self.__person_list = []
         self.__hotel_list = []
+        
+    #Request จากคนทำ Payment ขอเพิ่ม attribute temp_booking_list และ temp_transaction_list สำหรับเก็บไว้ชั่วคราว
 
     def get_name(self):
         return self.__name
@@ -35,44 +42,45 @@ class Company:
             if email == person.get_account().get_email():
                 if password == person.get_account().get_password():
                     set_current_user(person)
-                    return {"Welcome"}
-                return {"You enter wrong password"}
-        return {"Not found"}
+                    return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Login Successfully"})
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"message": "Wrong Password"})
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"message": "Email doesn't exist"})
     
     def register(self, firstname, lastname, country, province, zip_code, birthday, phone_number, email, password, confirm_password): 
         for person in self.__person_list:
             if email == person.get_account().get_email():
-                return "Email is already exist"
+                return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "Email already exist"})
         if password == confirm_password:
             account = Account(email, password, "customer")
             customer = Customer(firstname, lastname, country, province, zip_code, birthday, phone_number, account)
             self.__person_list.append(customer)
-            return {"Register Successful"}
-        return {"Not the same password"}
+            return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Register Successfully"})
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "Password doesn't match"})
 
     def search_nearby_hotel(self, country, province):
         nearby_hotel_list = []
         for hotel in self.__hotel_list:
             if hotel.get_location().get_country() == country and hotel.get_location().get_province() == province:
                 nearby_hotel_list.append(hotel.get_name())
-        return nearby_hotel_list
+        return JSONResponse(status_code=status.HTTP_200_OK, content=nearby_hotel_list)
 
-    def search_booking(self, firstname, lastname, booking_no, check_in_date): # Jack
+    def search_booking(self, firstname, lastname, booking_no, check_in_date):
         for person in self.__person_list:
             if(person.get_account().get_role() == "customer"):  
                 if(firstname == person.get_firstname() and lastname == person.get_lastname()):
                     for booking in person.get_booking_list():
                         if(booking_no == booking.get_booking_no() and check_in_date == booking.get_interval().get_begin_date()):
-                            return {"firstname": booking.get_firstname(), 
-                                    "lastname": booking.get_lastname(),
-                                    "booking_no": booking.get_booking_no(),
-                                    "room_type": booking.get_room_type(),
-                                    "room_quantity": booking.get_room_quantity(),
-                                    "check_in_date": booking.get_interval().get_begin_date(),
-                                    "check_out_date": booking.get_interval().get_end_date(),
-                                    "status": booking.get_status()}
-                    return None
-        return None
+                            return JSONResponse(status_code=status.HTTP_200_OK, content={"firstname": booking.get_firstname(), 
+                                                                                                    "lastname": booking.get_lastname(),
+                                                                                                    "booking_no": booking.get_booking_no(),
+                                                                                                    "hotel_name": booking.get_hotel_name(),
+                                                                                                    "room_type": booking.get_room_type(),
+                                                                                                    "room_quantity": booking.get_room_quantity(),
+                                                                                                    "check_in_date": booking.get_interval().get_begin_date(),
+                                                                                                    "check_out_date": booking.get_interval().get_end_date(),
+                                                                                                    "status": booking.get_status()})
+                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "No booking Information"})
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "Firstname and Surname doesn't exist"})
     
     def add_opinion(self, hotel_name, comment, rating):
         if 0 > rating > 5:
@@ -114,15 +122,3 @@ class Company:
                 'amount': amount,
                 'summary of charges': room.get_price()*amount*interval.get_night(),
                 'night': interval.get_night()}
-
-
-    # # def (self, firstname, lastname, booking_no, room_type, room_quantityhotel):
-    # #     if nself.hoitetel is inot in hotel; in  in hotelself.hote;l_lkist:
-    #         __
-    #         if roomroomisinstance()room_ty
-        
-    # and payment(roo,ohotel,room_type    )yself           )len() and isinstance()room_quy,int == roo,m_qwuuanitiytynti
-    #         for person in self.__person_list:
-    #             if person.get_firstname() == firstname and person.gettlastname() == lastname:y:
-                        
-                        

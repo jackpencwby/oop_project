@@ -1,6 +1,6 @@
-# from pydantic import BaseModel
-# from ..internal.Location import Location
+from pydantic import BaseModel
+from .location import LocationModel
 
-# class HotelModel(BaseModel):
-#     name: str
-#     location: Location
+class HotelModel(BaseModel):
+    name: str
+    location: LocationModel

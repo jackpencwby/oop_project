@@ -8,6 +8,8 @@ class Hotel:
         self.__status = None
         self.__room_list = []
 
+    #Request จากคนทำ payment ขอเพิ่ม attribute hotel_email ของโรงแรมเพือนำไปแสดงใน paypaltransaction
+
     def get_name(self):
         return self.__name
     

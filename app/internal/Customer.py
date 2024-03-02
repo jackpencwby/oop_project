@@ -1,4 +1,7 @@
+from fastapi import HTTPException, status
+from fastapi.responses import JSONResponse
 from .Person import Person
+from ..instance import company
 
 class Customer(Person):
     def __init__(self, firstname, lastname, country, province, zip_code, birthday, phone_number, account):
@@ -6,7 +9,7 @@ class Customer(Person):
         self.__credit_card = None
         self.__coupon = None
         self.__booking_list = []
-        self.__my_favolite_hotel = []
+        self.__my_favolite_hotel_list = []
     
     def get_credit_card(self):
         return self.__credit_card
@@ -30,14 +33,14 @@ class Customer(Person):
         self.__booking_list.append(booking)
 
     def get_personal_information(self):
-        return {"firstname": self.get_firstname(),
+        return JSONResponse(status_code=status.HTTP_200_OK, content={"firstname": self.get_firstname(),
                 "lastname": self.get_lastname(),
                 "email": self.get_account().get_email(),
                 "country": self.get_country(),
                 "province": self.get_province(),
                 "zip_code": self.get_zip_code(),
                 "birthday": self.get_birthday(),
-                "phone_number": self.get_phone_number()}
+                "phone_number": self.get_phone_number()})
     
     def get_my_travelling(self):
         arriving = []
@@ -59,16 +62,19 @@ class Customer(Person):
                                  "room_quantity": booking.get_room_quantity(),
                                  "check_in_date": booking.get_interval().get_begin_date(),
                                  "check_out_date": booking.get_interval().get_end_date()})
-        return {"arriving": arriving, "cancelled": cancelled}
+        return JSONResponse(status_code=status.HTTP_200_OK, content={"arriving": arriving, "cancelled": cancelled})
     
-    def add_my_favorite_hotel(self, hotel):
-        self.__my_favolite_hotel.append(hotel)
+    def add_my_favorite_hotel(self, hotel_name):
+        for hotel in company.company.get_hotel_list():
+            if(hotel_name == hotel.get_name()):
+                self.__my_favolite_hotel_list.append(hotel)
+                return JSONResponse(status_code=status.HTTP_200_OK, content="Add Successfully")
 
     def get_my_favorite_hotel(self):
         my_favorite_hotel = []
-        for hotel in self.__my_favolite_hotel:
+        for hotel in self.__my_favolite_hotel_list:
             my_favorite_hotel.append(hotel.get_name())
-        return my_favorite_hotel
+        return JSONResponse(status_code=status.HTTP_200_OK, content=my_favorite_hotel)
             
     def booking(self):
         pass

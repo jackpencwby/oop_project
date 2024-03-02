@@ -47,7 +47,9 @@ customer2 = Customer(firstname="customer",
 
 customer1.add_booking(booking1_customer1)
 customer1.add_booking(booking2_customer1)
+customer1.add_booking(booking3_customer1)
 
 customer2.add_booking(booking1_customer2)
 customer2.add_booking(booking2_customer2)
+customer2.add_booking(booking3_customer2)
 
