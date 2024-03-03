@@ -2,9 +2,10 @@ from .Room import Room
 from .Opinion import Opinion
 
 class Hotel:
-    def __init__(self, name, location):
+    def __init__(self, name, location, hotel_email):
         self.__name = name
         self.__location = location
+        self.__hotel_email = hotel_email
         self.__status = None
         self.__room_list = []
 
@@ -15,6 +16,9 @@ class Hotel:
     
     def get_location(self):
         return self.__location
+
+    def get_hotel_email(self):
+        return self.__hotel_email
     
     def get_status(self):
         return self.__status

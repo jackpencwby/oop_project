@@ -1,5 +1,7 @@
+from .Transaction import Transaction
+
 class Booking:
-    def __init__(self, firstname, lastname, booking_no, hotel, room_type, room_quantity, interval, status, payment=None):
+    def __init__(self, firstname, lastname, booking_no, hotel, room_type, room_quantity, interval, status, transaction=None):
         self.__firstname = firstname
         self.__lastname = lastname
         self.__booking_no = booking_no
@@ -8,7 +10,7 @@ class Booking:
         self.__room_quantity = room_quantity
         self.__interval = interval   
         self.__status = status  # status: cancelled, pending, wait_for_checkin, wait_for_checkout
-        self.__payment = payment
+        self.__transaction = transaction
 
     def get_firstname(self):
         return self.__firstname
@@ -34,12 +36,19 @@ class Booking:
     def get_status(self):
         return self.__status
     
-    def get_payment(self):
-        return self.__payment
+    def get_transaction(self):
+        return self.__transaction
     
-    def set_payment(self, payment):
-        self.__payment = payment
+    def set_transaction(self, transaction):
+        if isinstance(transaction,Transaction):
+            self.__transaction = transaction
+            return "Transaction Setting Successed in Booking"
+        return "Transaction setting error in booking"
     
     def set_status(self, status):
-        # Validation
-        self.__status = status
+        if isinstance(status,str) and (status == "Cancelled" or status == "Pending" or status == "Wait_for_checkin" or status == "Wait_for_checkout"):
+            self.__status = status
+            return "Booking Status Setting Success"
+        return "Booking Status Setting Error"
+
+

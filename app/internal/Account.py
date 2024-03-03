@@ -4,8 +4,6 @@ class Account:
         self.__password = password
         self.__role = role
     
-    #Request จ่ากคนทำ Payment ขอเพื่ม attribute account id และ bank เพื่อนำไปใช้ใน MobilebankTransaction
-    
     def get_email(self):
         return self.__email
     

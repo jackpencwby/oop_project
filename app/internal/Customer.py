@@ -1,22 +1,26 @@
 from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
 from .Person import Person
-from .CreditCardPayment import CreditCardPayment
+from .CreditCardTransaction import CreditCardTransaction
 from ..instance import company
+from .Coupon import Coupon
 
 class Customer(Person):
     def __init__(self, firstname, lastname, country, province, zip_code, birthday, phone_number, account):
         super().__init__(firstname, lastname, country, province, zip_code, birthday, phone_number, account)
         self.__credit_card = None
-        self.__coupon = None
+        self.__coupon_list = []
         self.__booking_list = []
         self.__my_favolite_hotel_list = []
+
+    #Request จากคนทำ payment ขอเพิ่ม attribute account_id,bank,paypal_id เพื่อนำไปเช็คกับ argument ใน Method select_transaction()
+    #Request จากคนทำ payment ขอ้เปลี่ยน attribute จาก Coupon เป็น Coupon list และมั Method add_coupon()
     
     def get_credit_card(self):
         return self.__credit_card
     
-    def get_coupon(self):
-        return self.__coupon
+    def get_coupon_list(self):
+        return self.__coupon_list
     
     def get_booking_list(self):
         return self.__booking_list
@@ -32,6 +36,12 @@ class Customer(Person):
     def add_booking(self, booking):
         # validation
         self.__booking_list.append(booking)
+
+    def add_coupon(self,coupon):
+        if isinstance(coupon,Coupon):
+            self.__coupon_list.append(coupon)
+        return  "Coupon adding into list error"
+
 
     def get_personal_information(self):
         return JSONResponse(status_code=status.HTTP_200_OK, content={"firstname": self.get_firstname(),
