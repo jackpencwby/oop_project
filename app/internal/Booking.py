@@ -1,14 +1,14 @@
 class Booking:
-    def __init__(self, firstname, lastname, booking_no, hotel_name, room_type, room_quantity, interval, status):
+    def __init__(self, firstname, lastname, booking_no, hotel, room_type, room_quantity, interval, status, payment=None):
         self.__firstname = firstname
         self.__lastname = lastname
         self.__booking_no = booking_no
-        self.__hotel_name = hotel_name
+        self.__hotel = hotel
         self.__room_type = room_type
         self.__room_quantity = room_quantity
         self.__interval = interval   
         self.__status = status  # status: cancelled, pending, wait_for_checkin, wait_for_checkout
-        self.__transaction = transaction
+        self.__payment = payment
 
     def get_firstname(self):
         return self.__firstname
@@ -19,8 +19,8 @@ class Booking:
     def get_booking_no(self):
         return self.__booking_no
     
-    def get_hotel_name(self):
-        return self.__hotel_name
+    def get_hotel(self):
+        return self.__hotel
     
     def get_room_type(self):
         return self.__room_type
@@ -34,10 +34,12 @@ class Booking:
     def get_status(self):
         return self.__status
     
-    def change_status(self, status):
+    def get_payment(self):
+        return self.__payment
+    
+    def set_payment(self, payment):
+        self.__payment = payment
+    
+    def set_status(self, status):
         # Validation
         self.__status = status
-
-    def set_transaction(self,transaction):
-        if isinstance(transaction,Transaction):
-            pass

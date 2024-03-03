@@ -1,11 +1,13 @@
 class CreditCard:
-    def __init__(self,card_id,key,customer):
+    def __init__(self, card_id, balance):
         self.__card_id = card_id
-        self.__key = key
-        self.__customer = customer
+        self.__balance = balance
     
     def get_card_id(self):
         return self.__card_id
     
-    def get_key(self):
-        return self.__key
+    def get_balance(self):
+        return self.__balance
+    
+    def set_amount(self, balance):
+        self.__balance = balance

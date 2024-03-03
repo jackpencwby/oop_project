@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
 from .Person import Person
+from .CreditCardPayment import CreditCardPayment
 from ..instance import company
 
 class Customer(Person):
@@ -78,6 +79,15 @@ class Customer(Person):
             
     def booking(self):
         pass
+
+    def payment(self, booking_no):
+        for booking in self.__booking_list:
+            if(booking_no == booking.get_booking_no()):
+                if isinstance(booking.get_payment(), CreditCardPayment):
+                    old_balance = self.__credit_card.get_amount()
+                    new_balance = old_balance - booking.get_payment().get_amount()
+                    self.__credit_card.set_amount(new_balance)
+                    return JSONResponse(status_code=status.HTTP_200_OK, content="Payment Successfully")
 
     def cancle_booking(self):
         pass

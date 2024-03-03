@@ -4,12 +4,6 @@ from datetime import date as Date
 from .Customer import Customer
 from .Account import Account
 from .Interval import Interval
-
-from .Booking import Booking
-from .CreditCardTransaction import CreditCardTransaction
-from .MobileBankTransaction import MobileBankTransaction
-from .PaypalTransaction import PaypalTransaction
-
 from ..utils.dependency import set_current_user
 
 class Company:
@@ -51,7 +45,7 @@ class Company:
             if email == person.get_account().get_email():
                 return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "Email already exist"})
         if password == confirm_password:
-            account = Account(email, password, "customer")
+            account = Account(email, password, role="customer")
             customer = Customer(firstname, lastname, country, province, zip_code, birthday, phone_number, account)
             self.__person_list.append(customer)
             return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Register Successfully"})
