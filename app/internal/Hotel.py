@@ -2,14 +2,17 @@ from .Room import Room
 from .Opinion import Opinion
 
 class Hotel:
-    def __init__(self, name, location, hotel_email):
+    def __init__(self, name, location, hotel_email, balance=0):
         self.__name = name
         self.__location = location
         self.__hotel_email = hotel_email
+        self.__balance = balance
         self.__status = None
         self.__room_list = []
 
     #Request จากคนทำ payment ขอเพิ่ม attribute hotel_email ของโรงแรมเพือนำไปแสดงใน paypaltransaction
+    #Request จากคนทำ payment ขอเพิ่ม attribute balance ของโรงแรมเพือเก็บจำนวนเงินทั้งหมดที่ได้จากลูกค้า
+    #from flukky ถ้ามันได้ใช้ก็ใส่ได้เลยขรั่บ
 
     def get_name(self):
         return self.__name
@@ -22,6 +25,9 @@ class Hotel:
     
     def get_status(self):
         return self.__status
+
+    def get_balance(self):
+        return self.__balance
     
     def change_status(self, status):
         # Validation
@@ -34,6 +40,12 @@ class Hotel:
         # Validation
         self.__room_list.append(room)
 
+    def set_balance(self,balance):
+        if isinstance(balance,int):
+            self.__balance = balance
+            return  "Hotel balance setting success"
+        return  "Hotel balance setting error"
+        
     def get_available_room(self, interval, amount):     #Fluk
         all_available_room = []
         type_amount = {'small':0, 'medium':0, 'large':0}
@@ -50,7 +62,7 @@ class Hotel:
                         break
         return available_room
     
-    def select_room(self, interval, amount, room_type):
+    def select_room(self, interval, amount, room_type):     #fluk
         for room in self.__room_list:
             if room.get_type() == room_type and room.is_available_at(interval):
                 amount -= 1

@@ -1,6 +1,5 @@
 from ..internal.Booking import Booking
 from ..internal.Interval import Interval
-from ..internal.CreditCardPayment import CreditCardPayment
 from .hotel import *
 
 booking1_customer1 = Booking(firstname="customer", 
@@ -10,8 +9,7 @@ booking1_customer1 = Booking(firstname="customer",
                              room_type="small", 
                              room_quantity="1", 
                              interval=Interval(begin="1-1-2024", end="2-1-2024"),
-                             status="pending"
-                             payment=CreditCardPayment)
+                             status="pending")
 
 booking2_customer1 = Booking(firstname="customer", 
                              lastname="1", 

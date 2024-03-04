@@ -21,10 +21,8 @@ async def search_booking(firstname: str, lastname: str, booking_no: str, check_i
     return company.search_booking(firstname, lastname, booking_no, check_in_date)
 
 @router.post("/AllHotel")
-async def add_my_favorite_hotel(hotel_name: str):
-    if(get_current_user() == None):
-        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail={"message": "Please login first"})
-    return get_current_user().add_my_favorite_hotel(hotel_name)
+async def add_my_favorite_hotel(hotel_name):
+    return company.add_favorite_hotel(hotel_name, get_current_user())
 
 
 

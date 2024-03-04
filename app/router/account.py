@@ -6,21 +6,15 @@ router = APIRouter(prefix="/account", tags=["account"], responses={404: {"descri
 
 @router.get("/profile")
 async def get_personal_information():
-    if(get_current_user() == None):
-        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail={"message": "Please login first"})
-    return get_current_user().get_personal_information()
+    return company.get_personal_information(get_current_user())
 
 @router.get("/MyReservations")
 async def get_my_travelling():
-    if(get_current_user() == None):
-        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail={"message": "Please login first"})
-    return get_current_user().get_my_travelling()
+    return company.get_my_travelling(get_current_user())
 
 @router.get("/MyFavoriteHotel")
 async def get_my_favorite_hotel():
-    if(get_current_user() == None):
-        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail={"message": "Please login first"})
-    return get_current_user().get_my_favorite_hotel()
+    return company.get_my_favorite_hotel(get_current_user())
 
 
 

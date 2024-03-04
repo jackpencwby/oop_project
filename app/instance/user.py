@@ -1,7 +1,6 @@
 from ..internal.Admin import Admin
 from ..internal.Customer import Customer
 from ..internal.Account import Account
-from ..internal.CreditCard import CreditCard
 from .booking import *
 
 admin1_account = Account(email="admin1@gmail.com", password="admin1", role="admin")
@@ -46,11 +45,6 @@ customer2 = Customer(firstname="customer",
                      phone_number="5544332211", 
                      account=customer2_account) 
 
-
-credit_card_customer1 = CreditCard(card_id="1", balance=100000)
-
-credit_card_customer2 = CreditCard(card_id="2", balance=200000)
-
 customer1.add_booking(booking1_customer1)
 customer1.add_booking(booking2_customer1)
 customer1.add_booking(booking3_customer1)
@@ -59,9 +53,6 @@ customer2.add_booking(booking1_customer2)
 customer2.add_booking(booking2_customer2)
 customer2.add_booking(booking3_customer2)
 
-customer1.add_credit_card(credit_card_customer1)
-
-customer2.add_credit_card(credit_card_customer2)
 
 
 

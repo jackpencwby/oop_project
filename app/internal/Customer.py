@@ -1,104 +1,78 @@
 from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
 from .Person import Person
-from .CreditCardTransaction import CreditCardTransaction
-from ..instance import company
-from .Coupon import Coupon
 
 class Customer(Person):
     def __init__(self, firstname, lastname, country, province, zip_code, birthday, phone_number, account):
         super().__init__(firstname, lastname, country, province, zip_code, birthday, phone_number, account)
-        self.__credit_card = None
         self.__coupon_list = []
         self.__booking_list = []
-        self.__my_favolite_hotel_list = []
+        self.__my_favorite_hotel_list = []
 
     #Request จากคนทำ payment ขอเพิ่ม attribute account_id,bank,paypal_id เพื่อนำไปเช็คกับ argument ใน Method select_transaction()
+    #ส่วนนี้ผู้ใช้จะกรอกมาตอนจะจ่ายตังเอง ไม่ต้องมีก็ได้นะ เว้นแต่จะทำ 'บันทึกเป็นบัตรที่ใช้ประจำ'  -fluk
     #Request จากคนทำ payment ขอ้เปลี่ยน attribute จาก Coupon เป็น Coupon list และมั Method add_coupon()
-    
-    def get_credit_card(self):
-        return self.__credit_card
-    
+    #OKKKKK -fluk
+    #Request จากคนทำ payment ขอ้เพิ่ม attribute balance เพื่อเก็บจำนวนเงินทั้งหมดของลูกค้า
+    #ยังไม่มั่นใจ
+        
     def get_coupon_list(self):
         return self.__coupon_list
-    
+        
     def get_booking_list(self):
         return self.__booking_list
-
-    def add_credit_card(self, credit_card):
-        # Validation
-        self.__credit_card = credit_card
+    
+    def get_my_favorite_hotel_list(self):
+        return self.__my_favorite_hotel_list
     
     def add_coupon(self, coupon):
         # Validation
-        self.__coupon = coupon
-
+        self.__coupon_list.append(coupon)
+    
     def add_booking(self, booking):
         # validation
         self.__booking_list.append(booking)
-
-    def add_coupon(self,coupon):
-        if isinstance(coupon,Coupon):
-            self.__coupon_list.append(coupon)
-        return  "Coupon adding into list error"
-
-
-    def get_personal_information(self):
-        return JSONResponse(status_code=status.HTTP_200_OK, content={"firstname": self.get_firstname(),
-                "lastname": self.get_lastname(),
-                "email": self.get_account().get_email(),
-                "country": self.get_country(),
-                "province": self.get_province(),
-                "zip_code": self.get_zip_code(),
-                "birthday": self.get_birthday(),
-                "phone_number": self.get_phone_number()})
     
-    def get_my_travelling(self):
-        arriving = []
-        cancelled = []
-        for booking in self.__booking_list:
-            if(booking.get_status() == "paid"):
-                arriving.append({"firstname": booking.get_firstname(),
-                                 "lastname": booking.get_lastname(),
-                                 "booking_no": booking.get_booking_no(),
-                                 "room_type": booking.get_room_type(),
-                                 "room_quantity": booking.get_room_quantity(),
-                                 "check_in_date": booking.get_interval().get_begin_date(),
-                                 "check_out_date": booking.get_interval().get_end_date()})
-            elif(booking.get_status() == "cancel"):
-                cancelled.append({"firstname": booking.get_firstname(),
-                                 "lastname": booking.get_lastname(),
-                                 "booking_no": booking.get_booking_no(),
-                                 "room_type": booking.get_room_type(),
-                                 "room_quantity": booking.get_room_quantity(),
-                                 "check_in_date": booking.get_interval().get_begin_date(),
-                                 "check_out_date": booking.get_interval().get_end_date()})
-        return JSONResponse(status_code=status.HTTP_200_OK, content={"arriving": arriving, "cancelled": cancelled})
-    
-    def add_my_favorite_hotel(self, hotel_name):
-        for hotel in company.company.get_hotel_list():
-            if(hotel_name == hotel.get_name()):
-                self.__my_favolite_hotel_list.append(hotel)
-                return JSONResponse(status_code=status.HTTP_200_OK, content="Add Successfully")
+    def add_favorite_hotel(self, hotel):
+        # Validation
+        self.__my_favorite_hotel_list.append(hotel)    
 
-    def get_my_favorite_hotel(self):
-        my_favorite_hotel = []
-        for hotel in self.__my_favolite_hotel_list:
-            my_favorite_hotel.append(hotel.get_name())
-        return JSONResponse(status_code=status.HTTP_200_OK, content=my_favorite_hotel)
-            
-    def booking(self):
-        pass
+        
 
-    def payment(self, booking_no):
-        for booking in self.__booking_list:
-            if(booking_no == booking.get_booking_no()):
-                if isinstance(booking.get_payment(), CreditCardPayment):
-                    old_balance = self.__credit_card.get_amount()
-                    new_balance = old_balance - booking.get_payment().get_amount()
-                    self.__credit_card.set_amount(new_balance)
-                    return JSONResponse(status_code=status.HTTP_200_OK, content="Payment Successfully")
+    # def search_transaction(self,booking_no):
+    #     for booking in self.__booking_list:
+    #         if booking.get_booking_no() == booking_no:
+    #             json = {}
+    #             if isinstance(booking.get_transaction(),CreditCardTransaction):
+    #                 json["Your Transaction"] = {'Transaction number' : booking.get_transaction().get_transaction_id(),
+    #                                         'Transaction amount' : booking.get_transaction().get_amount(),
+    #                                         'Transaction Status' : booking.get_transaction().get_status(),
+    #                                         'Transaction Date' : booking.get_transaction().get_created_at(),
+    #                                         'Credit Card Number' : booking.get_transaction().get_card_id(),
+    #                                         'Credit Card CVV' : booking.get_transaction().get_cvv()}
 
-    def cancle_booking(self):
-        pass
-    
+    #             elif isinstance(booking.get_transaction(),MobileBankTransaction):
+    #                 json["Your Transaction"] = {'Transaction number' : booking.get_transaction().get_transaction_id(),
+    #                                         'Transaction amount' : booking.get_transaction().get_amount(),
+    #                                         'Transaction Status' : booking.get_transaction().get_status(),
+    #                                         'Transaction Date' : booking.get_transaction().get_created_at(),
+    #                                         'Customer Bank Account ID' : booking.get_transaction().get_account_id(),
+    #                                         'Customer Bank' : booking.get_transaction().get_bank()}
+
+    #     elif isinstance(self.__current_booking.get_transaction(),PaypalTransaction):
+    #         json["Your Transaction"] = {'Firstname' : self.__current_booking.get_firstname(),
+    #                                 'Lastname' : self.__current_booking.get_lastname(),
+    #                                 'Booking number' : self.__current_booking.get_booking_no(),
+    #                                 'Hotel' : self.__current_booking.get_hotel().get_name(),
+    #                                 'Room Type' : self.__current_booking.get_room_type(),
+    #                                 'Room Amount' : self.__current_booking.get_room_quantity(),
+    #                                 'Status' : self.__current_booking.get_status(),
+    #                                 'Transaction number' : booking.get_transaction().get_transaction_id(),
+    #                                 'Transaction amount' : booking.get_transaction().get_amount(),
+    #                                 'Transaction Status' : booking.get_transaction().get_status(),
+    #                                 'Transaction Date' : booking.get_transaction().get_created_at(),
+    #                                 'Hotel Email Address' : booking.get_hotel().get_hotel_email(),
+    #                                 'Customer Email Address' : booking.get_transaction().get_customer_email(),
+    #                                 'Customer Paypal ID' : booking.get_transaction().get_paypal_id()}
+    #     return json
+        

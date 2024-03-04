@@ -48,12 +48,12 @@ room4_hotel6 = Room(room_no="4", type="medium", price=8000)
 room5_hotel6 = Room(room_no="5", type="medium", price=8000)
 room6_hotel6 = Room(room_no="6", type="large", price=12000)
 
-hotel1 = Hotel(name="hotel1", location=location1)
-hotel2 = Hotel(name="hotel2", location=location1)
-hotel3 = Hotel(name="hotel3", location=location2)
-hotel4 = Hotel(name="hotel4", location=location2)
-hotel5 = Hotel(name="hotel5", location=location3)
-hotel6 = Hotel(name="hotel6", location=location3)
+hotel1 = Hotel(name="hotel1", location=location1, hotel_email="hotel1@gmail.com")
+hotel2 = Hotel(name="hotel2", location=location1, hotel_email="hotel2@gmail.com")
+hotel3 = Hotel(name="hotel3", location=location2, hotel_email="hotel3@gmail.com")
+hotel4 = Hotel(name="hotel4", location=location2, hotel_email="hotel4@gmail.com")
+hotel5 = Hotel(name="hotel5", location=location3, hotel_email="hotel5@gmail.com")
+hotel6 = Hotel(name="hotel6", location=location3, hotel_email="hotel6@gmail.com")
 
 hotel1.add_room(room1_hotel1)
 hotel1.add_room(room2_hotel1)
@@ -96,6 +96,3 @@ hotel6.add_room(room3_hotel6)
 hotel6.add_room(room4_hotel6)
 hotel6.add_room(room5_hotel6)
 hotel6.add_room(room6_hotel6)
-
-
-

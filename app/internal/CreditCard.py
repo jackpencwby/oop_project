@@ -14,4 +14,7 @@ class CreditCard:
         return self.__balance
     
     def set_amount(self, balance):
-        self.__balance = balance
+        if isinstance(balance,int):
+            self.__balance = balance
+            return "Credit Card Balance Setting Success"
+        return "Credit Card Balance Setting Error"
