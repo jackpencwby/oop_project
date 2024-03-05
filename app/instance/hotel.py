@@ -1,6 +1,7 @@
 from ..internal.Hotel import Hotel
 from ..internal.Room import Room
 from ..internal.Location import Location
+from ..internal.Opinion import Opinion
 
 location1 = Location(country="Thailand", province="Bangkok")
 location2 = Location(country="England", province="London")
@@ -96,3 +97,4 @@ hotel6.add_room(room3_hotel6)
 hotel6.add_room(room4_hotel6)
 hotel6.add_room(room5_hotel6)
 hotel6.add_room(room6_hotel6)
+

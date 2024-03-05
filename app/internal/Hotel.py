@@ -9,6 +9,7 @@ class Hotel:
         self.__balance = balance
         self.__status = None
         self.__room_list = []
+        self.__opinion_list = []
 
     #Request จากคนทำ payment ขอเพิ่ม attribute hotel_email ของโรงแรมเพือนำไปแสดงใน paypaltransaction
     #Request จากคนทำ payment ขอเพิ่ม attribute balance ของโรงแรมเพือเก็บจำนวนเงินทั้งหมดที่ได้จากลูกค้า
@@ -23,11 +24,11 @@ class Hotel:
     def get_hotel_email(self):
         return self.__hotel_email
     
-    def get_status(self):
-        return self.__status
-
     def get_balance(self):
         return self.__balance
+    
+    def get_status(self):
+        return self.__status
     
     def change_status(self, status):
         # Validation
@@ -36,10 +37,16 @@ class Hotel:
     def get_room_list(self):
         return self.__room_list
     
+    def get_opinion(self):
+        return self.__opinion_list
+    
     def add_room(self, room):
         # Validation
         self.__room_list.append(room)
 
+    def add_opinion(self, opinion):
+        self.__opinion_list.append(opinion)
+                
     def set_balance(self,balance):
         if isinstance(balance,int):
             self.__balance = balance
@@ -75,12 +82,7 @@ class Hotel:
             if room.get_type() == type:
                 return room
 
-    def get_opinion(self):
-        return self.__opinion_list
 
-    def append_opinion(self, comment, rating):
-        self.__opinion_list.append(Opinion(comment, rating))
-                
                 
 
 

@@ -5,25 +5,24 @@ from .Customer import Customer
 from .Account import Account
 from .Interval import Interval 
 from .Booking import Booking
-# from .Bank import Bank
-# from .CreditCardTransaction import CreditCardTransaction
-# from .MobileBankTransaction import MobileBankTransaction
-# from .PaypalTransaction import PaypalTransaction
+from .Opinion import Opinion
+from .Bank import Bank
+from .CreditCardTransaction import CreditCardTransaction
+from .MobileBankTransaction import MobileBankTransaction
+from .PaypalTransaction import PaypalTransaction
 from ..utils.dependency import set_current_user
 from ..utils.dependency import get_current_user
 
 class Company:
-
-    total = 0
-    
     def __init__(self, name):
         self.__name = name
         self.__person_list = []
         self.__hotel_list = []
-        
         self.__bank_list = []
+        self.__total = 0
         self.__current_hotel = None
         self.__current_booking = None
+        self.__current_booking_id = '001'
         self.__current_transaction = None
 
     def get_name(self):
@@ -156,17 +155,27 @@ class Company:
                 current_user.add_favorite_hotel(hotel)
                 return JSONResponse(status_code=status.HTTP_200_OK, content="Add Successfully")
     
-    def add_opinion(self, hotel_name, comment, rating):
+    def add_opinion(self, hotel_name, rating, comment, current_user):
+        if(current_user == None):
+            return HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail={"message": "Please login first"})
         if 0 > rating > 5:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "Invalid rating"})
+            return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "Invalid rating"})
         for hotel in self.__hotel_list:
-            if hotel.get_hotel_name() == hotel_name:
-                hotel.append_opinion(comment, rating)
-                return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Success"})
+            if hotel.get_name() == hotel_name:
+                hotel.add_opinion(Opinion(rating, comment))
+                return JSONResponse(status_code=status.HTTP_200_OK, content={"message": "Add opinion successfully"})
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "Hotel not found"})
     
-    
-    def view_rate_from_hotel(self, hotel_name, date_list, amount):
+    def get_opinion(self, hotel_name):
+        for hotel in self.__hotel_list:
+            if hotel_name == hotel.get_name():
+                if len(hotel.get_opinion()) == 0:
+                    return JSONResponse(status_code=status.HTTP_200_OK, content={"rating": "No rating",
+                                                                             "comment": "No comment"})
+                else: return JSONResponse(status_code=status.HTTP_200_OK, content={"rating": sum([int(opinion.get_rating()) for opinion in hotel.get_opinion()]) / len(hotel.get_opinion()),
+                                                                             "comment": [opinion.get_comment() for opinion in hotel.get_opinion()]})
+            
+    def view_rate_from_hotel(self, hotel_name:str, date_list:list, amount:int):
         needed_hotel, interval = self.convert_hotel_and_interval(hotel_name, date_list)
         room_list = needed_hotel.get_available_room(interval, amount)
         json = {}
@@ -193,10 +202,11 @@ class Company:
         needed_hotel, interval = self.convert_hotel_and_interval(hotel_name, date_list)
         needed_hotel.select_room(interval, amount, room_type)
         room = needed_hotel.get_room_by_type(room_type)
-        total = room.get_price()* amount * interval.get_night()
-
+        self.__total = room.get_price()* amount * interval.get_night()
         self.__current_hotel = needed_hotel
-        self.__current_booking = Booking(get_current_user.get_firstname(), get_current_user.get_lastname(), self.__current_booking_id, self.__current_hotel, room_type, amount, interval, "Pending")
+        if get_current_user() == None:
+            return {'response':'please login first.'}
+        self.__current_booking = Booking(get_current_user().get_firstname(), get_current_user().get_lastname(), self.__current_booking_id, self.__current_hotel, room_type, amount, interval, "Pending")
         
         # run current booking id by 1
         new_id = str(int(self.__current_booking_id) + 1)
@@ -205,21 +215,19 @@ class Company:
         return {'room type': room_type,
                 'interval': interval,
                 'amount': amount,
-                'summary of charges': total,
+                'summary of charges': self.__total,
                 'night': interval.get_night()}
     ##Yew
-    #def show_coupon_list(self):
-    #   json = {}
-    #   for person in self.__person_list:
-    #        if person.get_firstname() == self.__current_booking.get_firstname() and person.get_lastname() == self.__current_booking.get_lastname():
-    #             for coupon in person.get_coupon_list():
-    #                 json[f'Coupon #{person.get_coupon_list().index(coupon) + 1}'] = {'Coupon id': coupon.get_coupon_id(),
-    #                                                                                 'Expiration Date': coupon.get_exp_date(),
-    #                                                                                 'Amount' : coupon.get_amount()}
-    #             return json
+    def show_coupon_list(self):
+      json = {}
+      for person in self.__person_list:
+           if person.get_firstname() == self.__current_booking.get_firstname() and person.get_lastname() == self.__current_booking.get_lastname():
+                for coupon in person.get_coupon_list():
+                    json[f'Coupon #{person.get_coupon_list().index(coupon) + 1}'] = {'Coupon id': coupon.get_coupon_id(),
+                                                                                    'Expiration Date': coupon.get_exp_date(),
+                                                                                    'Amount' : coupon.get_amount()}
+                return json
         
-        
-    # 
     # def select_transaction(self, selection,coupon_id, transaction_arg1, transaction_arg2):#select:str -> paypal, creditcard, mobilebank
     #     ### First Section ###
     #     for person in self.__person_list:
@@ -229,24 +237,23 @@ class Company:
     #                if selection == 'C': #CreditCard transaction 
     #                   for card in bank.get_card_list():
     #                       if card.get_card_id() == transaction_arg1 and card.get_key() == transaction_arg2:
-    #                           self.__current_transaction = CreditCardTransaction(total,self.__current_transaction_id,"Unpaid",transaction_arg1,transaction_arg2)
+    #                           self.__current_transaction = CreditCardTransaction(self.__total,None,self.__current_transaction_id,"Unpaid",transaction_arg1,transaction_arg2)
     #                           loopcount = True
     #                           break
     #                
     #               elif selection == 'M': #MobileBank transaction
     #                   for account_id in bank.get_account_id_list():
     #                       if account_id == transaction_arg1 and bank.get_name() == transaction_arg2:
-    #                           self.__current_transaction = MobileBankTransaction(total,self.__current_transaction_id,"Unpaid",transaction_arg1,transaction_arg2)
+    #                           self.__current_transaction = MobileBankTransaction(self.__total,None,self.__current_transaction_id,"Unpaid",transaction_arg1,transaction_arg2)
     #                           loopcount = True
     #                           break
     #     
     #               elif selection == 'P': #Paypal transaction
     #                   for paypal_id in bank.get_paypal_id_list():
     #                       if person.get_account().get_email() == transaction_arg1 and paypal_id == transaction_arg2:
-    #                           self.__current_transaction = PaypalTransaction(total,self.__current_transaction_id,"Unpaid",transaction_arg1,transaction_arg2)
+    #                           self.__current_transaction = PaypalTransaction(self.__total,None,self.__current_transaction_id,"Unpaid",transaction_arg1,transaction_arg2)
     #                           loopcount = True
     #                           break
-    #             
     #             break
 
     #     if loopcount == False: #Argument or search cannot found
@@ -264,12 +271,14 @@ class Company:
     #             self.__current_transaction.set_amount(self.__current_transaction.get_amount() -= coupon.get_amount())
     #             get_current_user.get_coupon_list().pop(get_current_user.get_coupon_list().index(coupon))#delete coupon from list in customer
         
-    #     #if get_current_user.get_credit_card().get_amount() >= total:
-    #         #if isinstance(self.__current_transaction,CreditCardTransaction):
-    #             #get_current_user.get_credit_card().set_amount(get_current_user.get_credit_card().get_amount() - total)
+    #     for bank in self.__bank_list:
+    #        for card in bank.get_card_list():
+    #           if isinstance(self.__current_transaction,CreditCardTransaction) and card.get_card_id() == transaction_arg1:
+    #               if card.get_amount() >= self.__total:
+    #                   card.set_amount(get_current_user.get_credit_card().get_amount() - total)
           
     #     ### Last Section ###
-    #     self.__current_hotel.set_balance(self.__current_hotel.get_balance() + total)#Increase customer balance amount
+    #     self.__current_hotel.set_balance(self.__current_hotel.get_balance() + total)#Increase cust balance amount
     #     self.__current_transaction.set_status("Paid")
 
     #     self.__current_transaction.set_created_at(str(Date.today()))#set date
@@ -277,52 +286,31 @@ class Company:
 
     #     get_current_user.add_booking(self.__current_booking)
 
-    #     json = {}
-    #     if isinstance(self.__current_booking.get_transaction(),CreditCardTransaction):
-    #         json["Your Booking"] = {'Firstname' : self.__current_booking.get_firstname(),
-    #                                 'Lastname' : self.__current_booking.get_lastname(),
-    #                                 'Booking number' : self.__current_booking.get_booking_no(),
-    #                                 'Hotel' : self.__current_booking.get_hotel().get_name(),
-    #                                 'Room Type' : self.__current_booking.get_room_type(),
-    #                                 'Room Amount' : self.__current_booking.get_room_quantity(),
-    #                                 'Status' : self.__current_booking.get_status(),
-    #                                 'Transaction number' : self.__current_transaction.get_transaction_id(),
-    #                                 'Transaction amount' : self.__current_transaction.get_amount(),
-    #                                 'Transaction Status' : self.__current_transaction.get_status(),
-    #                                 'Transaction Date' : self.__current_transaction.get_created_at(),
-    #                                 'Credit Card Number' : self.__current_transaction.get_card_id(),
-    #                                 'Credit Card CVV' : self.__current_transaction.get_cvv()}
+        # json = {}
+        # json["Your Booking"] = {'Firstname' : self.__current_booking.get_firstname(),
+        #                             'Lastname' : self.__current_booking.get_lastname(),
+        #                             'Booking number' : self.__current_booking.get_booking_no(),
+        #                             'Hotel' : self.__current_booking.get_hotel().get_name(),
+        #                             'Room Type' : self.__current_booking.get_room_type(),
+        #                             'Room Amount' : self.__current_booking.get_room_quantity(),
+        #                             'Status' : self.__current_booking.get_status(),
+        #                             'Transaction number' : self.__current_transaction.get_transaction_id(),
+        #                             'Transaction amount' : self.__current_transaction.get_amount(),
+        #                             'Transaction Status' : self.__current_transaction.get_status(),
+        #                             'Transaction Date' : self.__current_transaction.get_created_at()}
+                    
+        # if isinstance(self.__current_booking.get_transaction(),CreditCardTransaction):
+        #     json["Your Booking"] = {'Credit Card Number' : self.__current_transaction.get_card_id(),
+        #                             'Credit Card CVV' : self.__current_transaction.get_cvv()}
 
-    #     elif isinstance(self.__current_booking.get_transaction(),MobileBankTransaction):
-    #         json["Your Booking"] = {'Firstname' : self.__current_booking.get_firstname(),
-    #                                 'Lastname' : self.__current_booking.get_lastname(),
-    #                                 'Booking number' : self.__current_booking.get_booking_no(),
-    #                                 'Hotel' : self.__current_booking.get_hotel().get_name(),
-    #                                 'Room Type' : self.__current_booking.get_room_type(),
-    #                                 'Room Amount' : self.__current_booking.get_room_quantity(),
-    #                                 'Status' : self.__current_booking.get_status(),
-    #                                 'Transaction number' : self.__current_transaction.get_transaction_id(),
-    #                                 'Transaction amount' : self.__current_transaction.get_amount(),
-    #                                 'Transaction Status' : self.__current_transaction.get_status(),
-    #                                 'Transaction Date' : self.__current_transaction.get_created_at(),
-    #                                 'Customer Bank Account ID' : self.__current_transaction.get_account_id(),
-    #                                 'Customer Bank' : self.__current_transaction.get_bank()}
+        # elif isinstance(self.__current_booking.get_transaction(),MobileBankTransaction):
+        #     json["Your Booking"] = {'Customer Bank Account ID' : self.__current_transaction.get_account_id(),
+        #                             'Customer Bank' : self.__current_transaction.get_bank()}
 
-    #     elif isinstance(self.__current_booking.get_transaction(),PaypalTransaction):
-    #         json["Your Booking"] = {'Firstname' : self.__current_booking.get_firstname(),
-    #                                 'Lastname' : self.__current_booking.get_lastname(),
-    #                                 'Booking number' : self.__current_booking.get_booking_no(),
-    #                                 'Hotel' : self.__current_booking.get_hotel().get_name(),
-    #                                 'Room Type' : self.__current_booking.get_room_type(),
-    #                                 'Room Amount' : self.__current_booking.get_room_quantity(),
-    #                                 'Status' : self.__current_booking.get_status(),
-    #                                 'Transaction number' : self.__current_transaction.get_transaction_id(),
-    #                                 'Transaction amount' : self.__current_transaction.get_amount(),
-    #                                 'Transaction Status' : self.__current_transaction.get_status(),
-    #                                 'Transaction Date' : self.__current_transaction.get_created_at(),
-    #                                 'Hotel Email Address' : self.__current_hotel.get_hotel_email(),
-    #                                 'Customer Email Address' : self.__current_transaction.get_customer_email(),
-    #                                 'Customer Paypal ID' : self.__current_transaction.get_paypal_id()}
+        # elif isinstance(self.__current_booking.get_transaction(),PaypalTransaction):
+        #     json["Your Booking"] = {'Hotel Email Address' : self.__current_hotel.get_hotel_email(),
+        #                             'Customer Email Address' : self.__current_transaction.get_customer_email(),
+        #                             'Customer Paypal ID' : self.__current_transaction.get_paypal_id()}
         
     #     #remove current attribute
     #     self.__current_booking = None
