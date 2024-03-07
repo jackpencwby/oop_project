@@ -1,5 +1,3 @@
-from datetime import date 
-
 class Transaction:
     def __init__(self, amount, created_at, transaction_id, status):
         self.__amount = amount
@@ -37,7 +35,7 @@ class Transaction:
         return "Date setting error"
 
     def set_status(self,status):
-        if isinstance(status,str) and (status == "Unpaid" or status == "Paid" or status == "Canceled"):
+        if isinstance(status,str): #and (status == "Unpaid" or status == "Paid" or status == "Canceled"):
             self.__status = status
             return "Status Setting success"
         return "Status Setting Error"

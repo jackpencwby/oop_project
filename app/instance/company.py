@@ -1,6 +1,7 @@
 from ..internal.Company import Company
 from .hotel import *
 from .user import *
+from .bank import *
 
 company = Company(name="marriot")
 
@@ -15,4 +16,8 @@ company.add_hotel(hotel3)
 company.add_hotel(hotel4)
 company.add_hotel(hotel5)
 company.add_hotel(hotel6)
+
+company.add_bank(scb)
+company.add_bank(kbank)
+
 

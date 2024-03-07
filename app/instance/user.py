@@ -2,6 +2,7 @@ from ..internal.Admin import Admin
 from ..internal.Customer import Customer
 from ..internal.Account import Account
 from .booking import *
+from .coupon import *
 
 admin1_account = Account(email="admin1@gmail.com", password="admin1", role="admin")
 admin2_account = Account(email="admin2@gmail.com", password="admin2", role="admin")
@@ -52,6 +53,14 @@ customer1.add_booking(booking3_customer1)
 customer2.add_booking(booking1_customer2)
 customer2.add_booking(booking2_customer2)
 customer2.add_booking(booking3_customer2)
+
+customer1.add_coupon(customer1_coupon1)
+customer1.add_coupon(customer1_coupon2)
+customer1.add_coupon(customer1_coupon3)
+
+customer2.add_coupon(customer2_coupon1)
+customer2.add_coupon(customer2_coupon2)
+
 
 
 

@@ -9,7 +9,7 @@ from .router import payment
 
 app = FastAPI()
 
-# app.include_router(home.router)
+app.include_router(home.router)
 app.include_router(search.router)
 app.include_router(auth.router)
 app.include_router(account.router)

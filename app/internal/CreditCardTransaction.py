@@ -1,9 +1,8 @@
-from .Customer import Customer
 from .Transaction import Transaction
 
 class CreditCardTransaction(Transaction):
     def __init__(self, amount,created_at,transaction_id,status,card_id,cvv):
-        super().__init__(self, amount,created_at,transaction_id,status)
+        Transaction.__init__(self,amount,created_at,transaction_id,status)
         self.__card_id = card_id
         self.__cvv = cvv
         self.__paytype = "Credit Card"
@@ -13,15 +12,6 @@ class CreditCardTransaction(Transaction):
 
     def get_cvv(self):
         return self.__cvv
-
-    def set_card_id(self,card_id):
-        if isinstance(card_id,str):
-            self.__card_id = card_id
-            return "Card id Setting Success"
-        return "Card id Setting Error"
     
-    def set_ccv(self,cvv):
-        if isinstance(cvv,str) and len(cvv) == 3:
-            self.__cvv = cvv
-            return "CVV Setting Success"
-        return "CVV Setting Error"
+    def get_paytype(self):
+        return self.__paytype

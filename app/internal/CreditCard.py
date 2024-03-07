@@ -13,7 +13,7 @@ class CreditCard:
     def get_balance(self):
         return self.__balance
     
-    def set_amount(self, balance):
+    def set_balance(self, balance):
         if isinstance(balance,int):
             self.__balance = balance
             return "Credit Card Balance Setting Success"

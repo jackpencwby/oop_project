@@ -33,6 +33,6 @@ class Bank:
 
     def add_credit_card(self,card):
         if isinstance(card,CreditCard):
-            self.___card_list.append(card)
+            self.__card_list.append(card)
             return "A Credit Card adding success in list"
         return "A Credit Card adding error in list"

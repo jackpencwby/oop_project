@@ -54,6 +54,8 @@ class Hotel:
         return  "Hotel balance setting error"
         
     def get_available_room(self, interval, amount):     #Fluk
+        if not isinstance(amount, int) or amount > 3:
+            raise Exception('Too much amount needed at same time!')
         all_available_room = []
         type_amount = {'small':0, 'medium':0, 'large':0}
         for room in self.__room_list:
@@ -70,17 +72,25 @@ class Hotel:
         return available_room
     
     def select_room(self, interval, amount, room_type):     #fluk
+        room_list = []
+        if room_type not in ['small', 'medium', 'large']:
+            raise Exception('Invalid Room Type!')
         for room in self.__room_list:
             if room.get_type() == room_type and room.is_available_at(interval):
                 amount -= 1
-                room.add_pending_interval(interval)
+                room_list.append(room)
             if amount == 0:
-                return 'done'
+                break
+        if amount == 0:
+            [room.add_pending_interval(interval) for room in room_list]
+            return 'done'
+        raise Exception(f'Rooms are not enought!?!{amount}')
 
     def get_room_by_type(self, type):
         for room in self.__room_list:
             if room.get_type() == type:
                 return room
+        raise Exception('Error to get room!')
 
 
                 

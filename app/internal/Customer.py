@@ -76,3 +76,5 @@ class Customer(Person):
     #                                 'Customer Paypal ID' : booking.get_transaction().get_paypal_id()}
     #     return json
         
+    
+        

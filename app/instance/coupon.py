@@ -1,12 +1,11 @@
 from ..internal.Coupon import Coupon
-from ..internal.Customer import Customer
 
-coupon11 = Coupon("2001",500,"12-01-2568")
-coupon12 = Coupon("2002",100,"13-02-2566")
-coupon13 = Coupon("2003",700,"28-07-2568")
+customer1_coupon1 = Coupon("1001",500,"2025-01-12")
+customer1_coupon2= Coupon("1002",100,"2023-02-13")
+customer1_coupon3 = Coupon("1003",700,"2025-07-23")
 
-coupon21 = Coupon("2010",1000,"12-05-2568")
-coupon22 = Coupon("2011",50,"01-01-2556")
+customer2_coupon1 = Coupon("1010",1000,"2025-05-12")
+customer2_coupon2 = Coupon("1011",50,"2013-01-07")
 
 
 

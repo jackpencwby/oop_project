@@ -1,7 +1,7 @@
 from tkinter import *
 import requests
 
-API_SELECT_ENDPOINT = "http://127.0.0.1:8000/reservation/reviewDetails"
+API_SELECT_ENDPOINT = "http://127.0.0.1:8000/reservation/rateListMenu"
 
 def on_click2():
     user_list = user1.get().split()
@@ -64,16 +64,12 @@ data_list = ['0']
 
 Label(root, text="Start Date :").grid(row=0, column=0, padx=10, ipady=5, sticky='E')
 Entry(root, textvariable=st_date, width=12, justify="left").grid(row=0, column=1, padx=10)
-Label(root, text="Start Time :").grid(row=1, column=0,padx=10, ipady=5, sticky='E')
-Entry(root, textvariable=st_time, width=12, justify="left").grid(row=1, column=1, padx=10)
 Label(root, text="End Date :").grid(row=2, column=0,padx=10, ipady=5, sticky='E')
 Entry(root, textvariable=end_date, width=12, justify="left").grid(row=2, column=1, padx=10)
-Label(root, text="End Time :").grid(row=3, column=0,padx=10, ipady=5, sticky='E')
-Entry(root, textvariable=end_time, width=12, justify="left").grid(row=3, column=1, padx=10)
-Label(root, text="Capacity :").grid(row=4, column=0,padx=10, ipady=5, sticky='E')
+Label(root, text="Amount :").grid(row=4, column=0,padx=10, ipady=5, sticky='E')
 Entry(root, textvariable=capacity, width=12, justify="left").grid(row=4, column=1, padx=10)
 set_input1()
-Button(root, text=" Search ", bg="green", command=on_click).grid(row=5, column=0, columnspan=2)
+Button(root, text=" Select ", bg="green", command=on_click).grid(row=5, column=0, columnspan=2)
 
 om = OptionMenu(root, select_opt, *data_list)
 om.grid(row=6, column=1)

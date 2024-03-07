@@ -2,7 +2,7 @@ from .Transaction import Transaction
 
 class MobileBankTransaction(Transaction):
     def __init__(self, amount, created_at, transaction_id,status,account_id,bank):
-        super().__init__(self, created_at, amount,transaction_id,status)
+        Transaction.__init__(self,amount,created_at,transaction_id,status)
         self.__account_id = account_id
         self.__bank = bank
         self.__paytype = "Mobile Banking"
@@ -12,6 +12,9 @@ class MobileBankTransaction(Transaction):
 
     def get_bank(self):
         return self.__bank
+    
+    def get_paytype(self):
+        return self.__paytype
 
     def set_account_id(self,account_id):
         if isinstance(account_id,str):
