@@ -1,5 +1,6 @@
 from .Room import Room
 from .Opinion import Opinion
+from fastapi import HTTPException, status
 
 class Hotel:
     def __init__(self, name, location, hotel_email, balance=0):
@@ -10,10 +11,6 @@ class Hotel:
         self.__status = None
         self.__room_list = []
         self.__opinion_list = []
-
-    #Request จากคนทำ payment ขอเพิ่ม attribute hotel_email ของโรงแรมเพือนำไปแสดงใน paypaltransaction
-    #Request จากคนทำ payment ขอเพิ่ม attribute balance ของโรงแรมเพือเก็บจำนวนเงินทั้งหมดที่ได้จากลูกค้า
-    #from flukky ถ้ามันได้ใช้ก็ใส่ได้เลยขรั่บ
 
     def get_name(self):
         return self.__name
@@ -45,7 +42,11 @@ class Hotel:
         self.__room_list.append(room)
 
     def add_opinion(self, opinion):
-        self.__opinion_list.append(opinion)
+        if isinstance(opinion, Opinion):
+            self.__opinion_list.append(opinion)
+            return 'done'
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail = {"message": "Invalid opinion"})
                 
     def set_balance(self,balance):
         if isinstance(balance,int):
@@ -54,8 +55,8 @@ class Hotel:
         return  "Hotel balance setting error"
         
     def get_available_room(self, interval, amount):     #Fluk
-        if not isinstance(amount, int) or amount > 3:
-            raise Exception('Too much amount needed at same time!')
+        if not isinstance(amount, int) or amount > 3 or amount < 1:
+            raise Exception('Invalid amount of room')
         all_available_room = []
         type_amount = {'small':0, 'medium':0, 'large':0}
         for room in self.__room_list:
@@ -63,10 +64,10 @@ class Hotel:
                 type_amount[room.get_type()] += 1
                 all_available_room.append(room)
         available_room = []
-        for k, v in type_amount.items():
-            if v >= amount:      
+        for type, a in type_amount.items():
+            if a >= amount:      
                 for room in all_available_room:
-                    if room.get_type() == k:
+                    if room.get_type() == type:
                         available_room.append(room) 
                         break
         return available_room
@@ -84,7 +85,7 @@ class Hotel:
         if amount == 0:
             [room.add_pending_interval(interval) for room in room_list]
             return 'done'
-        raise Exception(f'Rooms are not enought!?!{amount}')
+        raise Exception(f'Rooms are not enought!?!')
 
     def get_room_by_type(self, type):
         for room in self.__room_list:

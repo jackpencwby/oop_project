@@ -4,7 +4,6 @@ class Transaction:
         self.__created_at = created_at
         self.__transaction_id = transaction_id
         self.__status = status
-        self.__paytype = None
         #Transaction Status: Unpaid,paid,cancelled
 
     def get_amount(self):
@@ -18,9 +17,6 @@ class Transaction:
 
     def get_status(self):
         return self.__status
-
-    def get_paytype(self):
-        return self.__paytype
 
     def set_amount(self,amount):
         if isinstance(amount,int):

@@ -28,15 +28,19 @@ class Room:
     def is_available_at(self, interval):    #check both reserved, pending -- Fluk
         checkin = interval.get_begin_date()
         checkout = interval.get_end_date()
-        for room_interval in self.__reserved_interval + self.__pending_interval:
+        for room_interval in (self.__reserved_interval + self.__pending_interval):
             reserved_checkin = room_interval.get_begin_date()
             reserved_checkout = room_interval.get_end_date()
-            if (checkin > reserved_checkin and checkin < reserved_checkout) or (checkout > reserved_checkin and checkout < reserved_checkout):
+            if (checkin >= reserved_checkin and checkin <= reserved_checkout) or (checkout >= reserved_checkin and checkout <= reserved_checkout):
                 return False
         return True
 
     def add_pending_interval(self, interval):
         self.__pending_interval.append(interval)
+        return 'done'
+    
+    def add_reserved_interval(self, interval):
+        self.__reserved_interval.append(interval)
         return 'done'
 
     

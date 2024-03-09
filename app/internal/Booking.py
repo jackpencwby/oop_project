@@ -42,7 +42,7 @@ class Booking:
         return "Transaction Setting Successed in Booking"
 
     def set_status(self, status):
-        if status == "Cancelled" or status == "Pending" or status == "Wait_for_checkin" or status == "Wait_for_checkout":
+        if status == "cancelled" or status == "pending" or status == "wait_for_checkin" or status == "wait_for_checkout":
             self.__status = status
             return "Booking Status Setting Success"
 

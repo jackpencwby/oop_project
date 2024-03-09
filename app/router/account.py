@@ -17,12 +17,12 @@ async def get_my_favorite_hotel():
     return company.get_my_favorite_hotel(get_current_user())
 
 @router.post("/AddFavoriteHotel")
-async def add_my_favorite_hotel(hotel_name):
-    return company.add_favorite_hotel(hotel_name, get_current_user())
+async def add_my_favorite_hotel(data:dict):
+    return company.add_favorite_hotel(data['hotel_name'], get_current_user())
 
 @router.post("/AddOpinion")
-async def add_opinion(hotel_name, rating: int, comment):
-    return company.add_opinion(hotel_name, rating, comment, get_current_user())
+async def add_opinion(data:dict):
+    return company.add_opinion(data['hotel_name'], data['rating'], data['comment'], get_current_user())
 
 
 

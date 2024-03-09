@@ -8,13 +8,6 @@ class Customer(Person):
         self.__coupon_list = []
         self.__booking_list = []
         self.__my_favorite_hotel_list = []
-
-    #Request จากคนทำ payment ขอเพิ่ม attribute account_id,bank,paypal_id เพื่อนำไปเช็คกับ argument ใน Method select_transaction()
-    #ส่วนนี้ผู้ใช้จะกรอกมาตอนจะจ่ายตังเอง ไม่ต้องมีก็ได้นะ เว้นแต่จะทำ 'บันทึกเป็นบัตรที่ใช้ประจำ'  -fluk
-    #Request จากคนทำ payment ขอ้เปลี่ยน attribute จาก Coupon เป็น Coupon list และมั Method add_coupon()
-    #OKKKKK -fluk
-    #Request จากคนทำ payment ขอ้เพิ่ม attribute balance เพื่อเก็บจำนวนเงินทั้งหมดของลูกค้า
-    #ยังไม่มั่นใจ
         
     def get_coupon_list(self):
         return self.__coupon_list

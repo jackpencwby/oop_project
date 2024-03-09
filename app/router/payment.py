@@ -16,12 +16,12 @@ async def show_coupon():
     return company.show_coupon_list()
     
 @router.post("/methodselect")
-async def methodselect(selection:str,transaction_arg1:str,transaction_arg2:str):
-    return company.select_transaction(selection,transaction_arg1,transaction_arg2)
+async def methodselect(data:dict):
+    return company.select_transaction(data['selection'],data['transaction_arg1'],data['transaction_arg2'])
 
 @router.post("/couponselect")
-async def couponselect(coupon_id:str):
-    return company.select_coupon(coupon_id)
+async def couponselect(data:dict):
+    return company.select_coupon(data['coupon_id'])
 
 @router.post("/process")
 async def process():

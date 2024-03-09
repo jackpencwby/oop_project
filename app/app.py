@@ -6,6 +6,7 @@ from .router import account
 from .router import hotel
 from .router import reservation
 from .router import payment
+from .router import admin
 
 app = FastAPI()
 
@@ -16,7 +17,7 @@ app.include_router(account.router)
 app.include_router(hotel.router)
 app.include_router(reservation.router)
 app.include_router(payment.router)
-
+app.include_router(admin.router)
 
 
 
