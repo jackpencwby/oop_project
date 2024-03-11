@@ -376,7 +376,7 @@ class Company:
         if self.__current_booking == None or self.__current_transaction == None or self.__current_booking.get_firstname() != get_current_user().get_firstname():
            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
                               detail={"message": "You\'ve not made any transaction yet"})
-        if coupon_id == None:#User didnot use any coupon
+        if coupon_id == 'None':#User didnot use any coupon
             return JSONResponse(status_code=status.HTTP_200_OK,
                                     content={'coupon id': 'None',
                                              'discount amount': 'None',
