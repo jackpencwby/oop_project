@@ -75,7 +75,8 @@ class Hotel:
     def select_room(self, interval, amount, room_type):     #fluk
         room_list = []
         if room_type not in ['small', 'medium', 'large']:
-            raise Exception('Invalid Room Type!')
+            raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                                detail = {'message':'Invalid room type'})
         for room in self.__room_list:
             if room.get_type() == room_type and room.is_available_at(interval):
                 amount -= 1
@@ -85,7 +86,8 @@ class Hotel:
         if amount == 0:
             [room.add_pending_interval(interval) for room in room_list]
             return 'done'
-        raise Exception(f'Rooms are not enought!?!')
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail = {'message':'Rooms aren\'t enough'})
 
     def get_room_by_type(self, type):
         for room in self.__room_list:

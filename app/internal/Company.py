@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from datetime import date
 from .Person import Person
 from .Customer import Customer
+from .Admin import Admin
 from .Account import Account
 from .Interval import Interval 
 from .Booking import Booking
@@ -16,26 +17,17 @@ from ..utils.dependency import set_current_user
 from ..utils.dependency import get_current_user
 
 class Company:
-    def __init__(self, name):
+    def __init__(self, name, hotel_list):
         self.__name = name
         self.__person_list = []
-        self.__hotel_list = []
+        self.__hotel_list = hotel_list
         self.__bank_list = []
         self.__total = 0
         self.__current_hotel = None
         self.__current_booking = None
-        self.__current_booking_id = "001"
+        self.__current_booking_id = "007"
         self.__current_transaction = None
-        self.__current_transaction_id = "001"
-
-    def get_name(self):
-        return self.__name
-    
-    def get_person_list(self):
-        return self.__person_list
-    
-    def get_hotel_list(self):
-        return self.__hotel_list
+        self.__current_transaction_id = "007"
 
     def add_person(self, person):
         if isinstance(person, Person):
@@ -44,13 +36,6 @@ class Company:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail={'message':'Invalid person added'})
 
-    def add_hotel(self, hotel):
-        if isinstance(hotel, Hotel):
-            self.__hotel_list.append(hotel)
-            return 'done'
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail={'message':'Invalid hotel added'})
-
     def add_bank(self,bank):
         if isinstance(bank,Bank):
             self.__bank_list.append(bank)
@@ -58,13 +43,25 @@ class Company:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail={'message':'Invalid bank added'})
 
+    def reset_current_cache(self):
+        self.__current_hotel = None
+        self.__total = 0
+        self.__current_booking = None
+        self.__current_transaction = None
+
     def login(self, email, password):
+        # if get_current_user() != None:
+        #     raise HTTPException(status_code=status.HTTP_226_IM_USED, detail= {'message':f'You\'re now logged in as {get_current_user().get_firstname()}'})
         for person in self.__person_list:
             if email == person.get_account().get_email():
                 if password == person.get_account().get_password():
                     set_current_user(person)
-                    return JSONResponse(status_code=status.HTTP_200_OK, 
-                                        content={"message": "Login Successfully"})
+                    if isinstance(person, Customer):
+                        return JSONResponse(status_code=status.HTTP_200_OK, 
+                                        content={"message": "Customer login Successfully"})
+                    else:
+                        return JSONResponse(status_code=status.HTTP_200_OK, 
+                                        content={"message": "Admin login Successfully"})
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
                                     detail={"message": "Wrong Password"})
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
@@ -74,6 +71,7 @@ class Company:
         if(current_user == None):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
                                 detail={"message": "Please login first"})
+        self.reset_current_cache()
         set_current_user(None)
         return JSONResponse(status_code=status.HTTP_200_OK, 
                             content={"message": "Logout Successfully"}) 
@@ -97,12 +95,12 @@ class Company:
     def search_nearby_hotel(self, country, province):
         nearby_hotel_list = []
         for hotel in self.__hotel_list:
-            if hotel.get_location().get_country() == country and hotel.get_location().get_province() == province:
+            if hotel.get_location().get_country() == country or hotel.get_location().get_province() == province:
                 nearby_hotel_list.append({"hotel_name": hotel.get_name(),
                                           "location": {"country": hotel.get_location().get_country(), 
                                                        "province": hotel.get_location().get_province()}})
         if len(nearby_hotel_list) != 0:
-            return JSONResponse(status_code=status.HTTP_200_OK, content=nearby_hotel_list)
+            return JSONResponse(status_code=status.HTTP_200_OK, content={'hotel_list':nearby_hotel_list})
         return JSONResponse(status_code=status.HTTP_200_OK, content={"message":'No hotel nearby'})
 
     def search_booking(self, firstname, lastname, booking_no, check_in_date):
@@ -123,12 +121,12 @@ class Company:
                                                      "check_out_date": booking.get_interval().get_end_date().strftime("%A %d %B %Y"),
                                                      "status": booking.get_status()})
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
-                                    detail={"message": "No booking Information"})
+                                    detail={"message": "No booking Information"}) #Hey noo kaw ma nee si
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail={"message": "Firstname and Surname doesn't exist"})
     
     def get_personal_information(self, current_user):
-        if(current_user == None):
+        if(current_user == None): 
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
                                 detail={"message": "Please login first"})
         return JSONResponse(status_code=status.HTTP_200_OK, 
@@ -148,7 +146,7 @@ class Company:
         arriving = []
         cancelled = []
         for booking in current_user.get_booking_list():
-            if(booking.get_status() == "paid"):
+            if(booking.get_status() == "arriving"):
                 arriving.append({"firstname": booking.get_firstname(),
                                  "lastname": booking.get_lastname(),
                                  "booking_no": booking.get_booking_no(),
@@ -201,6 +199,18 @@ class Company:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
                             detail={"message": "Invalid hotel name"})
     
+    def remove_favorite_hotel(self, hotel_name, current_user):
+        if(current_user == None):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
+                                detail={"message": "Please login first"})
+        for hotel in self.__hotel_list: 
+            if hotel_name == hotel.get_name():
+                current_user.remove_favorite_hotel(hotel)
+                return JSONResponse(status_code=status.HTTP_200_OK, 
+                                    content={"message":"Removed Successfully"})
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
+                            detail={"message": "Invalid hotel name"})
+    
     def add_opinion(self, hotel_name, rating, comment, current_user):
         if(current_user == None):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
@@ -233,12 +243,13 @@ class Company:
                             detail={"message": "Invalid hotel name"})     
 
     def view_rate_from_hotel(self, hotel_name, date_list, amount):
+        self.reset_current_cache()
         needed_hotel, interval = self.convert_hotel_and_interval(hotel_name, date_list)
         room_list = needed_hotel.get_available_room(interval, amount)
         json = {}
+
         for room in room_list:
-            json[f'{room.get_type()} room type'] = {'price per night': room.get_price(),
-                                                    'image': 'jpeg'}
+            json[f'{room.get_type()} room type'] = {'price per night': room.get_price()}
         if len(json) == 0:
             return JSONResponse(status_code=status.HTTP_200_OK, 
                                 content={'message': 'no room available'})
@@ -255,7 +266,7 @@ class Company:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
                                 detail={"message": "Can't found hotel"})
         by, bm, bd = [int(x) for x in date_list[0].split('-')]
-        ey, em, ed = [int(x) for x in  date_list[1].split('-')]
+        ey, em, ed = [int(x) for x in date_list[1].split('-')]
         begin = date(by, bm, bd)
         end = date(ey, em, ed)
         if begin > date.today() and end > date.today() and end > begin:
@@ -268,105 +279,138 @@ class Company:
         if get_current_user() == None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
                                 detail={"message": "Please login first"})
+        self.__current_transaction = None
         self.__current_hotel, interval = self.convert_hotel_and_interval(hotel_name, date_list)
         self.__current_hotel.select_room(interval, amount, room_type)
         room = self.__current_hotel.get_room_by_type(room_type)
         self.__total = room.get_price()* amount * interval.get_night()
-
         self.__current_booking = Booking(get_current_user().get_firstname(), get_current_user().get_lastname(), self.__current_booking_id, self.__current_hotel, room_type, amount, interval, "Pending")
-        
-        # run current booking id by 1
-        new_id = f'00{int(self.__current_booking_id) + 1}'
+        new_id = f'{int(self.__current_booking_id) + 1}'
+        new_id = '0'*(3 - len(new_id)) + new_id
         self.__current_booking_id = new_id
         return JSONResponse(status_code=status.HTTP_200_OK, 
                             content={'room type': room_type,
-                                    'checkin_date': interval.get_begin_date(),
-                                    'checkout_date:': interval.get_end_date(),  
+                                    'checkin_date': interval.get_begin_date().strftime('%A %d %B %Y'),
+                                    'checkout_date:': interval.get_end_date().strftime('%A %d %B %Y'),  
                                     'amount': amount,
                                     'summary of charges': self.__total,
                                     'night': interval.get_night()})
     
-    # def continue_to_payment(self):
-    #     pass
-
     ##Yew
     def show_coupon_list(self):
+        if get_current_user() == None or not isinstance(get_current_user(), Customer):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
+                                detail={"message": "Please login first"})
         json = {}
         for person in self.__person_list:
             if person.get_firstname() == get_current_user().get_firstname() and person.get_lastname() == get_current_user().get_lastname():
                 for coupon in person.get_coupon_list():
-                    json[f'Coupon #{person.get_coupon_list().index(coupon) + 1}'] = {'Coupon id': coupon.get_coupon_id(),
-                                                                                    'Expiration Date': coupon.get_exp_date(),
-                                                                                    'Amount' : coupon.get_amount()}
-        return JSONResponse(status_code = status.HTTP_200_OK,
+                    if coupon.get_exp_date() > date.today():
+                        json[f'Coupon #{person.get_coupon_list().index(coupon) + 1}'] = {'Coupon id': coupon.get_coupon_id(),
+                                                                                        'Expiration Date': coupon.get_exp_date().strftime('%A %d %B %Y'),
+                                                                                        'Amount' : coupon.get_amount()}
+                return JSONResponse(status_code = status.HTTP_200_OK,
                             content = json)
+        raise HTTPException(statu_code = status.HTTP_200_OK,
+                            detail = {'message':'can\'t show coupon'})
     
+    def make_early_creditcard_transac(self, arg1, arg2):
+        for bank in self.__bank_list:
+            for card in bank.get_card_list():
+                if card.get_card_id() == arg1 and card.get_cvv() == arg2:   #and credit card cash balance is enough
+                    self.__current_transaction = CreditCardTransaction(self.__total, date.today(),  self.__current_transaction_id, "unpaid", arg1, arg2)
+                    return 'done'
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail = {'message':'no matched card'})
+
+    def make_early_mobilebank_transac(self, arg1, arg2):
+        for bank in self.__bank_list:
+            if bank.get_name() == arg2:
+                for account_id in bank.get_account_id_list():    #and bank account cash balance is enough
+                    if account_id == arg1:
+                        self.__current_transaction = MobileBankTransaction(self.__total, date.today(), self.__current_transaction_id, "unpaid", arg1, arg2)
+                        return 'done'
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail = {'message':'no matched account'})
+
+    def make_early_paypal_transac(self, arg1, arg2):    
+        for bank in self.__bank_list:
+             for paypal_id in bank.get_paypal_id_list():    #and paypal account cash balance is enough
+                if paypal_id == arg1 and arg2 in [person.get_account().get_email() for person in self.__person_list]:      #person.get_account().get_email()
+                    self.__current_transaction = PaypalTransaction(self.__total, date.today(), self.__current_transaction_id, "unpaid", arg1, arg2)
+                    return 'done'
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail = {'message':'no matched account'})
+
     def select_transaction(self, selection, transaction_arg1, transaction_arg2):#select:str -> paypal, creditcard, mobilebank
-        ### First Section ###
-        loopcount = False
-        for person in self.__person_list:
-            if person.get_firstname() == self.__current_booking.get_firstname() and person.get_lastname() == self.__current_booking.get_lastname():
-                for bank in self.__bank_list:
-                    if selection == 'C': #CreditCard transaction 
-                        for card in bank.get_card_list():
-                            if card.get_card_id() == transaction_arg1 and card.get_cvv() == transaction_arg2:
-                                self.__current_transaction = CreditCardTransaction(self.__total, date.today(),  self.__current_transaction_id, "Unpaid", transaction_arg1, transaction_arg2)
-                                loopcount = True
-                                break
-                   
-                    elif selection == 'M': #MobileBank transaction
-                        for account_id in bank.get_account_id_list():
-                            if account_id == transaction_arg1 and bank.get_name() == transaction_arg2:
-                                self.__current_transaction = MobileBankTransaction(self.__total, date.today(), self.__current_transaction_id, "Unpaid", transaction_arg1, transaction_arg2)
-                                loopcount = True
-                                break
+        if not isinstance(transaction_arg1, str) or not isinstance(transaction_arg2, str):
+            raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                                detail = {'message':'Invalid argument(s) type'})
+        if self.__current_booking == None:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
+                                detail={"message": "You\'ve not made any booking yet"})
+        if selection == 'C':
+            self.make_early_creditcard_transac(transaction_arg1, transaction_arg2)
+        elif selection == 'M':
+            self.make_early_mobilebank_transac(transaction_arg1, transaction_arg2)
+        elif selection == 'P':
+            self.make_early_paypal_transac(transaction_arg1, transaction_arg2)
+        else:
+            raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                                detail = {'message':'Invalid selection method'})
         
-                    elif selection == 'P': #Paypal transaction
-                        for paypal_id in bank.get_paypal_id_list():
-                            if paypal_id == transaction_arg1 and person.get_account().get_email() == transaction_arg2:
-                                self.__current_transaction = PaypalTransaction(self.__total, date.today(), self.__current_transaction_id, "Unpaid",transaction_arg1, transaction_arg2)
-                                loopcount = True
-                                break
-    
-        if loopcount == False: #Argument or search cannot found
-           raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
-                               detail={"message": "Invalid Transaction argument or Transaction argument not found in System"})
-        
-        #run current transaction id by 1
-        new_id = f'00{int(self.__current_transaction_id) + 1}'
+        new_id = f'{int(self.__current_transaction_id) + 1}'
+        new_id = '0'*(3 - len(new_id)) + new_id
         self.__current_transaction_id = new_id
 
         self.__current_booking.set_transaction(self.__current_transaction)
         
         return JSONResponse(status_code=status.HTTP_200_OK,
-                            content = {'message':"Transaction Method Selection successed"})
+                            content = {'transaction_type': self.__current_transaction.get_pay_type(),
+                                       'transaction_id' : self.__current_transaction.get_id()})
 
     def select_coupon(self, coupon_id):
-        ### Second Section ###
+        if get_current_user() == None or not isinstance(get_current_user(), Customer):
+          raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
+                              detail={"message": "Please login first"})
+        if self.__current_booking == None or self.__current_transaction == None or self.__current_booking.get_firstname() != get_current_user().get_firstname():
+           raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
+                              detail={"message": "You\'ve not made any transaction yet"})
+        if coupon_id == None:#User didnot use any coupon
+            return JSONResponse(status_code=status.HTTP_200_OK,
+                                    content={'coupon id': 'None',
+                                             'discount amount': 'None',
+                                             'current price':self.__current_transaction.get_amount()})
         for coupon in get_current_user().get_coupon_list():
-            if coupon.get_coupon_id() == coupon_id and coupon.get_exp_date() > str(date.today()):
+            if coupon.get_coupon_id() == coupon_id and coupon.get_exp_date() > date.today():
                 self.__current_transaction.set_amount(self.__current_transaction.get_amount() - coupon.get_amount())
-                get_current_user().get_coupon_list().pop(get_current_user().get_coupon_list().index(coupon))#delete coupon from list in customer
+                self.__current_transaction.add_coupon(coupon)
                 return JSONResponse(status_code=status.HTTP_200_OK,
-                                    content={'message':"Coupon Selection successed"})
-        return JSONResponse(status_code=status.HTTP_200_OK,
+                                    content={'coupon id': coupon.get_coupon_id(),
+                                             'discount amount': coupon.get_amount(),
+                                             'current price':self.__current_transaction.get_amount()})
+        return HTTPException(status_code=status.HTTP_200_OK,
                             content={'message':"Invalid coupon_id"})
         
+    def credit_card_process(self):
+        if isinstance(self.__current_transaction, CreditCardTransaction):
+            for bank in self.__bank_list:
+                for card in bank.get_card_list():
+                    if isinstance(self.__current_transaction, CreditCardTransaction) and card.get_card_id() == self.__current_transaction.get_card_id() and card.get_balance() >= self.__current_transaction.get_amount():
+                        card.set_balance(card.get_balance() - self.__current_transaction.get_amount())
+                        return
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail = {'message':'Credit card failed to pay'}) 
+
     def transaction_process(self):
-        for bank in self.__bank_list:
-            for card in bank.get_card_list():
-                if isinstance(self.__current_transaction,CreditCardTransaction):
-                    if card.get_balance() >= self.__total:
-                        card.set_balance(card.get_balance() - self.__total)
-          
-        ### Last Section ###
-        self.__current_hotel.set_balance(self.__current_hotel.get_balance() + self.__total)#Increase hotel balance amount
-        self.__current_transaction.set_status("Paid")
-
-        self.__current_transaction.set_created_at(str(date.today()))#set date
-        self.__current_booking.set_status("Wait_for_checkin")
-
+        self.credit_card_process()  
+        self.__current_hotel.set_balance(self.__current_hotel.get_balance() + self.__current_transaction.get_amount())
+        self.__current_transaction.set_status("paid")
+        self.__current_transaction.set_created_at(date.today())#set date
+        self.__current_booking.set_status("arriving")
+        
         get_current_user().add_booking(self.__current_booking)
+        get_current_user().remove_coupon(self.__current_transaction.get_coupon_used())
 
         json = {}
         json["Your Booking"] = {'Firstname' : self.__current_booking.get_firstname(),
@@ -376,29 +420,32 @@ class Company:
                                 'Room Type' : self.__current_booking.get_room_type(),
                                 'Room Amount' : self.__current_booking.get_room_quantity(),
                                 'Status' : self.__current_booking.get_status(),
-                                'Transaction Method' : self.__current_transaction.get_paytype(),
-                                'Transaction number' : self.__current_transaction.get_transaction_id(),
-                                'Transaction amount' : self.__current_transaction.get_amount(),
-                                'Transaction Status' : self.__current_transaction.get_status(),
-                                'Transaction Date' : self.__current_transaction.get_created_at()}
-                    
-        if isinstance(self.__current_booking.get_transaction(),CreditCardTransaction):
-            json["Your Booking"].update({'Credit Card Number' : self.__current_transaction.get_card_id(),
-                                         'Credit Card CVV' : self.__current_transaction.get_cvv()})
-
-        elif isinstance(self.__current_booking.get_transaction(),MobileBankTransaction):
-            json["Your Booking"].update({'Customer Bank Account ID' : self.__current_transaction.get_account_id(),
-                                         'Customer Bank' : self.__current_transaction.get_bank()})
-
-        elif isinstance(self.__current_booking.get_transaction(),PaypalTransaction):
-            json["Your Booking"].update({'Hotel Email Address' : self.__current_hotel.get_hotel_email(),
-                                         'Customer Email Address' : self.__current_transaction.get_customer_email(),
-                                         'Customer Paypal ID' : self.__current_transaction.get_paypal_id()})
+                                'Date': {'checkin': self.__current_booking.get_interval().get_begin_date().strftime('%A %d %B %Y'),
+                                         'checkout': self.__current_booking.get_interval().get_end_date().strftime('%A %d %B %Y')},
+                                'Transaction':{'Transaction Method' : self.__current_transaction.get_pay_type(),
+                                              'Transaction number' : self.__current_transaction.get_transaction_id(),
+                                              'Transaction amount' : self.__current_transaction.get_amount(),
+                                              'Transaction Status' : self.__current_transaction.get_status(),
+                                              'Transaction Date' : self.__current_transaction.get_created_at().strftime('%A %d %B %Y')}
+                                } 
         
-        #remove current attribute
-        self.__current_booking = None
-        self.__current_transaction = None
-        self.__current_hotel = None
+        if isinstance(self.__current_transaction, CreditCardTransaction):
+            json["Your Booking"]['Transaction'].update({'Credit Card Number' : self.__current_transaction.get_card_id(),
+                                                        'Credit Card CVV' : self.__current_transaction.get_cvv()})
+
+        elif isinstance(self.__current_transaction, MobileBankTransaction):
+            json["Your Booking"]['Transaction'].update({'Customer Bank Account ID' : self.__current_transaction.get_account_id(),
+                                                        'Customer Bank' : self.__current_transaction.get_bank()})
+
+        elif isinstance(self.__current_transaction, PaypalTransaction):
+            json["Your Booking"]['Transaction'].update({'Hotel Email Address' : self.__current_hotel.get_hotel_email(),
+                                                        'Customer Email Address' : self.__current_transaction.get_customer_email(),
+                                                        'Customer Paypal ID' : self.__current_transaction.get_paypal_id()})
+        if self.__current_transaction.get_coupon_used() != None:
+            json["Your Booking"]['Transaction'].update({'Coupon used' : {'coupon id': self.__current_transaction.get_coupon_used().get_coupon_id(),
+                                                                         'discount amount': self.__current_transaction.get_coupon_used().get_amount()}})
+        
+        self.reset_current_cache()
 
         return JSONResponse(status_code=status.HTTP_200_OK,
                             content = json)
@@ -406,17 +453,17 @@ class Company:
     #######################################################################################################################################################################################################
     #Admin
 
-    def admin_add_hotel(self, hotel, current_user):
+    def add_hotel(self, hotel, current_user):
         if(current_user != None):
             if(current_user.get_account().get_role() == "admin"):
                 if isinstance(hotel, Hotel):
                     self.__hotel_list.append(hotel)
-                    JSONResponse(status_code=status.HTTP_200_OK, content={'message':"Add hotel successfully"})
+                    return JSONResponse(status_code=status.HTTP_200_OK, content={'message':"Add hotel successfully"})
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "Invalid hotel object"})
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"message": "You are not an admin"})
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"message": "Please login first"})
 
-    def admin_delete_hotel(self, hotel_name, current_user):
+    def delete_hotel(self, hotel_name, current_user):
         if(current_user != None):
             if(current_user.get_account().get_role() == "admin"):
                 if isinstance(hotel_name, str):
@@ -429,17 +476,35 @@ class Company:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"message": "You are not an admin"})
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"message": "Please login first"})
                 
+    def cancel_booking(self, booking_no, current_user):
+        if(current_user == None):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"message": "Please login first"})
+        if not isinstance(booking_no, str) or len(booking_no) != 3:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "Invalid booking number"})
+        if isinstance(current_user, Customer):
+            booking = current_user.search_booking_by_id(booking_no)
+            if booking:
+                booking.set_status('cancelled')
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "No booking_id matched"})
+            
+        for person in self.__person_list:
+            if isinstance(person, Customer):
+                booking = person.search_booking_by_id(booking_no)
+                if booking:
+                    booking.set_status("cancelled")
+                    return JSONResponse(status_code=status.HTTP_200_OK, content={'message':"Cancel booking successfully"})
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "This booking number does not exist"})
+
     def admin_cancel_booking(self, booking_no, current_user):
         if(current_user != None):
-            if(current_user.get_account().get_role() == "admin"):
-                if isinstance(booking_no, str):
+            if isinstance(current_user, Admin):
+                if isinstance(booking_no, str) and len(booking_no) == 3:
                     for person in self.__person_list:
-                        if(person.get_account().get_role() == "customer"):
-                            for booking in person.get_booking_list():
-                                if(booking_no == booking.get_booking_no()):
-                                    booking.set_status("cancelled")
-                                    return JSONResponse(status_code=status.HTTP_200_OK, content={'message':"Cancel booking successfully"})
-                            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "This booking number does not exist"})
+                        if isinstance(person, Customer):
+                            booking = person.search_booking_by_id(booking_no)
+                            booking.set_status("cancelled")
+                            return JSONResponse(status_code=status.HTTP_200_OK, content={'message':"Cancel booking successfully"})
+                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "This booking number does not exist"})
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "Invalid booking number"})
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"message": "You are not an admin"})
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"message": "Please login first"})

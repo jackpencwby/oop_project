@@ -1,3 +1,6 @@
+from fastapi import HTTPException, status
+from .Transaction import Transaction
+
 class Booking:
     def __init__(self, firstname, lastname, booking_no, hotel, room_type, room_quantity, interval, status, transaction=None):
         self.__firstname = firstname
@@ -7,7 +10,7 @@ class Booking:
         self.__room_type = room_type
         self.__room_quantity = room_quantity
         self.__interval = interval   
-        self.__status = status 
+        self.__status = status  #arriving, cancelled, passed, staying
         self.__transaction = transaction
 
     def get_firstname(self):
@@ -38,8 +41,11 @@ class Booking:
         return self.__transaction
     
     def set_transaction(self, transaction):
-        self.__transaction = transaction
-        return "Transaction Setting Successed in Booking"
+        if isinstance(transaction, Transaction):
+            self.__transaction = transaction
+            return "Transaction Setting Successed in Booking"
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail = {'message':'Invalid transaction'})
 
     def set_status(self, status):
         if status == "cancelled" or status == "pending" or status == "wait_for_checkin" or status == "wait_for_checkout":

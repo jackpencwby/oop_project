@@ -17,13 +17,13 @@ async def show_coupon():
     
 @router.post("/methodselect")
 async def methodselect(data:dict):
-    return company.select_transaction(data['selection'],data['transaction_arg1'],data['transaction_arg2'])
+    return company.select_transaction(data['selection'], data['transaction_arg1'], data['transaction_arg2'])
 
 @router.post("/couponselect")
 async def couponselect(data:dict):
     return company.select_coupon(data['coupon_id'])
 
-@router.post("/process")
+@router.get("/process")
 async def process():
     return company.transaction_process()
 

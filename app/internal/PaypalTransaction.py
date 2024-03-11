@@ -7,10 +7,13 @@ class PaypalTransaction(Transaction):
         self.__paypal_id = paypal_id
 
     def get_customer_email(self):
-        return self.__customer_mail
+        return self.__customer_email
 
     def get_paypal_id(self):
         return self.__paypal_id
+
+    def get_pay_type(self):
+        return 'Paypal'
 
     def set_customer_email(self,email):
         if isinstance(email,str) and "@" in email:
@@ -19,8 +22,10 @@ class PaypalTransaction(Transaction):
         return "Email Setting Error"
     
     def set_paypal_id(self,paypal_id):
-        if isinstance(paypal_id,str):
+        if isinstance(paypal_id, str):
             self.__paypal_id = paypal_id
             return "Paypal id Setting Success"
         return "Paypal_id Setting Error"
+    
+
     

@@ -1,12 +1,5 @@
 from datetime import date
 
-# class Date:
-#     def __init__(self) -> None:
-#         year
-#         month
-#         day
-#     def < > ==  -
-# date(year, month, day)####################
 class Interval:
     def __init__(self, begin:date, end:date):
         self.__begin_date = begin   #Date object

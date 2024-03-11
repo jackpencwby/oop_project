@@ -1,6 +1,9 @@
 from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
 from .Person import Person
+from .Coupon import Coupon
+from .Booking import Booking
+from .Hotel import Hotel
 
 class Customer(Person):
     def __init__(self, firstname, lastname, country, province, zip_code, birthday, phone_number, account):
@@ -19,55 +22,34 @@ class Customer(Person):
         return self.__my_favorite_hotel_list
     
     def add_coupon(self, coupon):
-        # Validation
-        self.__coupon_list.append(coupon)
+        if isinstance(coupon, Coupon):
+            self.__coupon_list.append(coupon)
     
     def add_booking(self, booking):
-        # validation
-        self.__booking_list.append(booking)
+        if isinstance(booking, Booking):
+            self.__booking_list.append(booking)
     
     def add_favorite_hotel(self, hotel):
-        # Validation
-        self.__my_favorite_hotel_list.append(hotel)    
+        if isinstance(hotel ,Hotel):
+            self.__my_favorite_hotel_list.append(hotel) 
 
-        
+    def remove_favorite_hotel(self, hotel):
+        if isinstance(hotel ,Hotel) and hotel in self.__my_favorite_hotel_list:
+            self.__my_favorite_hotel_list.remove(hotel)   
+            return
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail = {'message':'This hotel isn\'t in favorite list'})
 
-    # def search_transaction(self,booking_no):
-    #     for booking in self.__booking_list:
-    #         if booking.get_booking_no() == booking_no:
-    #             json = {}
-    #             if isinstance(booking.get_transaction(),CreditCardTransaction):
-    #                 json["Your Transaction"] = {'Transaction number' : booking.get_transaction().get_transaction_id(),
-    #                                         'Transaction amount' : booking.get_transaction().get_amount(),
-    #                                         'Transaction Status' : booking.get_transaction().get_status(),
-    #                                         'Transaction Date' : booking.get_transaction().get_created_at(),
-    #                                         'Credit Card Number' : booking.get_transaction().get_card_id(),
-    #                                         'Credit Card CVV' : booking.get_transaction().get_cvv()}
-
-    #             elif isinstance(booking.get_transaction(),MobileBankTransaction):
-    #                 json["Your Transaction"] = {'Transaction number' : booking.get_transaction().get_transaction_id(),
-    #                                         'Transaction amount' : booking.get_transaction().get_amount(),
-    #                                         'Transaction Status' : booking.get_transaction().get_status(),
-    #                                         'Transaction Date' : booking.get_transaction().get_created_at(),
-    #                                         'Customer Bank Account ID' : booking.get_transaction().get_account_id(),
-    #                                         'Customer Bank' : booking.get_transaction().get_bank()}
-
-    #     elif isinstance(self.__current_booking.get_transaction(),PaypalTransaction):
-    #         json["Your Transaction"] = {'Firstname' : self.__current_booking.get_firstname(),
-    #                                 'Lastname' : self.__current_booking.get_lastname(),
-    #                                 'Booking number' : self.__current_booking.get_booking_no(),
-    #                                 'Hotel' : self.__current_booking.get_hotel().get_name(),
-    #                                 'Room Type' : self.__current_booking.get_room_type(),
-    #                                 'Room Amount' : self.__current_booking.get_room_quantity(),
-    #                                 'Status' : self.__current_booking.get_status(),
-    #                                 'Transaction number' : booking.get_transaction().get_transaction_id(),
-    #                                 'Transaction amount' : booking.get_transaction().get_amount(),
-    #                                 'Transaction Status' : booking.get_transaction().get_status(),
-    #                                 'Transaction Date' : booking.get_transaction().get_created_at(),
-    #                                 'Hotel Email Address' : booking.get_hotel().get_hotel_email(),
-    #                                 'Customer Email Address' : booking.get_transaction().get_customer_email(),
-    #                                 'Customer Paypal ID' : booking.get_transaction().get_paypal_id()}
-    #     return json
-        
+    def remove_coupon(self, coupon):
+        if coupon in self.__coupon_list:
+            self.__coupon_list.remove(coupon)
+            return 'done'
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail = {'messsage':'coupon doesn\'t in account'})
     
+    def search_booking_by_id(self, booking_no):
+        for booking in self.__booking_list:
+            if booking_no == booking.get_booking_no():
+                return booking
+        return None
         

@@ -1,5 +1,5 @@
 class Coupon:
-    def __init__(self,coupon_id, amount, exp_date):
+    def __init__(self, coupon_id, amount, exp_date):
         self.__coupon_id = coupon_id
         self.__amount = amount
         self.__exp_date = exp_date
