@@ -12,6 +12,6 @@ class CreditCardTransaction(Transaction):
     def get_cvv(self):
         return self.__cvv
     
-    def get_pay_type(self):
+    def get_pay_type(self): 
         return 'Credit Card'
     

@@ -1,14 +1,14 @@
+from fastapi import HTTPException, status
+from .Booking import Booking
 from .Room import Room
 from .Opinion import Opinion
-from fastapi import HTTPException, status
 
 class Hotel:
     def __init__(self, name, location, hotel_email, balance=0):
         self.__name = name
         self.__location = location
         self.__hotel_email = hotel_email
-        self.__balance = balance
-        self.__status = None
+        self.__balance = balance     
         self.__room_list = []
         self.__opinion_list = []
 
@@ -23,13 +23,6 @@ class Hotel:
     
     def get_balance(self):
         return self.__balance
-    
-    def get_status(self):
-        return self.__status
-    
-    def change_status(self, status):
-        # Validation
-        self.__status = status
 
     def get_room_list(self):
         return self.__room_list
@@ -38,23 +31,27 @@ class Hotel:
         return self.__opinion_list
     
     def add_room(self, room):
-        # Validation
-        self.__room_list.append(room)
+        if isinstance(room, Room):
+            self.__room_list.append(room)
+            return
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail = {"message": "Invalid Room"})
 
     def add_opinion(self, opinion):
         if isinstance(opinion, Opinion):
             self.__opinion_list.append(opinion)
-            return 'done'
+            return 
         raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
                             detail = {"message": "Invalid opinion"})
                 
-    def set_balance(self,balance):
-        if isinstance(balance,int):
+    def set_balance(self,balance): 
+        if isinstance(balance, int):
             self.__balance = balance
-            return  "Hotel balance setting success"
-        return  "Hotel balance setting error"
+            return 
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail = {"message": "Invalid balance"})
         
-    def get_available_room(self, interval, amount):     #Fluk
+    def get_available_room(self, interval, amount): 
         if not isinstance(amount, int) or amount > 3 or amount < 1:
             raise Exception('Invalid amount of room')
         all_available_room = []
@@ -72,7 +69,7 @@ class Hotel:
                         break
         return available_room
     
-    def select_room(self, interval, amount, room_type):     #fluk
+    def select_room(self, interval, amount, room_type): 
         room_list = []
         if room_type not in ['small', 'medium', 'large']:
             raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
@@ -85,15 +82,67 @@ class Hotel:
                 break
         if amount == 0:
             [room.add_pending_interval(interval) for room in room_list]
-            return 'done'
+            return 
         raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
                             detail = {'message':'Rooms aren\'t enough'})
 
-    def get_room_by_type(self, type):
+    def book_room(self, booking: Booking): 
+        amount = booking.get_room_quantity()
+        room_type = booking.get_room_type()
+        if booking.get_room_type() not in ['small', 'medium', 'large']:
+            raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                                detail = {'message':'Invalid room type'})
+        room_list = []
+        for room in self.__room_list:
+            if room.get_type() == room_type and room.is_pending_at(booking.get_interval()):
+                room_list.append(room)
+                amount -= 1
+            if amount == 0:
+                [room.move_pending_to_reserved(booking.get_interval()) for room in room_list]
+                return 
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail = {'message':'fail to Book'})
+
+    def cancel_room(self, booking): # cancel room in pending or reserved
+        amount = booking.get_room_quantity()
+        room_type = booking.get_room_type()
+        if booking.get_room_type() not in ['small', 'medium', 'large']:
+            raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                                detail = {'message':'Invalid room type'})
+        room_list = []
+        for room in self.__room_list:
+            if room.get_type() == room_type and not room.is_available_at(booking.get_interval()):
+                room_list.append(room)
+                amount -= 1
+            if amount == 0:
+                [room.remove_reserved_or_pending(booking.get_interval()) for room in room_list]
+                return
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail = {'message':'no room has this interval'})
+  
+    def cancel_pending_room(self, booking): # cancel room in pending
+        amount = booking.get_room_quantity()
+        room_type = booking.get_room_type()
+        if booking.get_room_type() not in ['small', 'medium', 'large']:
+            raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                                detail = {'message':'Invalid room type'})
+        room_list = []
+        for room in self.__room_list:
+            if room.get_type() == room_type and room.is_pending_at(booking.get_interval()):
+                room_list.append(room)
+                amount -= 1
+            if amount == 0:
+                [room.remove_reserved_or_pending(booking.get_interval()) for room in room_list]
+                return 
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail = {'message':'failed to cancel pending'})
+  
+    def get_room_by_type(self, type): 
         for room in self.__room_list:
             if room.get_type() == type:
-                return room
-        raise Exception('Error to get room!')
+                return room 
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail = {'message':'no room matched this type'})
 
 
                 

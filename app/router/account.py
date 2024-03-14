@@ -1,10 +1,10 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter
 from ..instance.company import company
 from ..utils.dependency import get_current_user
 
 router = APIRouter(prefix="/account", tags=["account"], responses={404: {"description": "Not Found"}})
 
-@router.get("/profile")     #กู
+@router.get("/profile") 
 async def get_personal_information():
     return company.get_personal_information(get_current_user())
 
@@ -16,7 +16,7 @@ async def get_my_travelling():
 async def get_my_favorite_hotel():
     return company.get_my_favorite_hotel(get_current_user())
 
-@router.post('/CancelBooking')
+@router.put('/CancelBooking')
 async def cancel_booking(data:dict):
     return company.cancel_booking(data['booking_no'], get_current_user())
 

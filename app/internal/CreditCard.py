@@ -1,3 +1,5 @@
+from fastapi import HTTPException, status
+
 class CreditCard:
     def __init__(self, card_id, cvv, balance):
         self.__card_id = card_id
@@ -13,8 +15,9 @@ class CreditCard:
     def get_balance(self):
         return self.__balance
     
-    def set_balance(self, balance):
-        if isinstance(balance,int):
+    def set_balance(self, balance): 
+        if isinstance(balance, int):
             self.__balance = balance
             return "Credit Card Balance Setting Success"
-        return "Credit Card Balance Setting Error"
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail = {'message':'Invalid balance'})

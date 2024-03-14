@@ -1,9 +1,6 @@
 from ..internal.Hotel import Hotel
 from ..internal.Room import Room
 from ..internal.Location import Location
-from ..internal.Opinion import Opinion
-from ..internal.Interval import Interval
-from datetime import date
 
 location1 = Location(country="Thailand", province="Bangkok")
 location2 = Location(country="England", province="London")
@@ -34,6 +31,7 @@ room1_hotel4 = Room(room_no="1", type="small", price=4000)
 room2_hotel4 = Room(room_no="2", type="small", price=4000)
 room3_hotel4 = Room(room_no="3", type="small", price=4000)
 room4_hotel4 = Room(room_no="4", type="medium", price=6000)
+
 room5_hotel4 = Room(room_no="5", type="medium", price=6000)
 room6_hotel4 = Room(room_no="6", type="large", price=8000)
 
@@ -99,7 +97,3 @@ hotel6.add_room(room3_hotel6)
 hotel6.add_room(room4_hotel6)
 hotel6.add_room(room5_hotel6)
 hotel6.add_room(room6_hotel6)
-
-# room1_hotel1.add_reserved_interval(Interval(date(2024,4,1), date(2024,4,3)))
-# room2_hotel1.add_reserved_interval(Interval(date(2024,4,1), date(2024,4,3)))
-# room3_hotel1.add_reserved_interval(Interval(date(2024,4,1), date(2024,4,3)))

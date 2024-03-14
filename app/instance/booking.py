@@ -1,11 +1,11 @@
+from datetime import date
 from ..internal.Booking import Booking
 from ..internal.Interval import Interval
-from ..internal.Transaction import Transaction
 from ..internal.CreditCardTransaction import CreditCardTransaction
-from ..internal.MobileBankTransaction import MobileBankTransaction
 from ..internal.PaypalTransaction import PaypalTransaction
 from .hotel import *
-from datetime import date
+
+interval = Interval(begin=date(2024, 4, 2), end=date(2024, 4, 4))
 
 booking1_customer1 = Booking(firstname="customer", 
                              lastname="1", 
@@ -55,7 +55,7 @@ booking1_customer2 = Booking(firstname="customer",
                              hotel=hotel4, 
                              room_type="small", 
                              room_quantity=1, 
-                             interval=Interval(begin=date(2024, 4, 2), end=date(2024, 4, 4)),
+                             interval=interval,
                              status="arriving",
                              transaction=PaypalTransaction(amount=8000,
                                                            created_at=date(2024, 2, 1),
@@ -96,3 +96,6 @@ booking3_customer2 = Booking(firstname="customer",
                                                           customer_email='customer2@gmail.com',
                                                           paypal_id='5001000'
                                                           ))
+
+room3_hotel4.add_pending_interval(interval)
+room3_hotel4.move_pending_to_reserved(interval)

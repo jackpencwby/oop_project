@@ -1,9 +1,8 @@
 from fastapi import HTTPException, status
-from fastapi.responses import JSONResponse
 from .Person import Person
-from .Coupon import Coupon
 from .Booking import Booking
 from .Hotel import Hotel
+from .Coupon import Coupon
 
 class Customer(Person):
     def __init__(self, firstname, lastname, country, province, zip_code, birthday, phone_number, account):
@@ -24,32 +23,45 @@ class Customer(Person):
     def add_coupon(self, coupon):
         if isinstance(coupon, Coupon):
             self.__coupon_list.append(coupon)
+            return
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail = {'messsage': 'Invalid coupon'})
     
     def add_booking(self, booking):
         if isinstance(booking, Booking):
             self.__booking_list.append(booking)
+            return
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail = {'messsage': 'Invalid booking'})
+            
+    def remove_coupon(self, coupon): 
+        if coupon in self.__coupon_list:
+            self.__coupon_list.remove(coupon)
+            return 
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail = {'messsage': 'Coupon doesn\'t in account'})
     
-    def add_favorite_hotel(self, hotel):
+    def add_favorite_hotel(self, hotel): 
         if isinstance(hotel ,Hotel):
-            self.__my_favorite_hotel_list.append(hotel) 
+            for hotel_index in self.__my_favorite_hotel_list:
+                if hotel_index.get_name() == hotel.get_name():
+                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                        detail = {'messsage': 'Hotel already added'})
+            self.__my_favorite_hotel_list.append(hotel)
+            return
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail = {'messsage': 'Invalid Hotel'})
 
-    def remove_favorite_hotel(self, hotel):
+    def remove_favorite_hotel(self, hotel): 
         if isinstance(hotel ,Hotel) and hotel in self.__my_favorite_hotel_list:
             self.__my_favorite_hotel_list.remove(hotel)   
             return
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail = {'message':'This hotel isn\'t in favorite list'})
+                            detail = {'message': 'This hotel isn\'t in favorite list'})
 
-    def remove_coupon(self, coupon):
-        if coupon in self.__coupon_list:
-            self.__coupon_list.remove(coupon)
-            return 'done'
-        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
-                            detail = {'messsage':'coupon doesn\'t in account'})
-    
-    def search_booking_by_id(self, booking_no):
+    def search_booking_by_id(self, booking_no): #เป็นการ return ออกไปที่ api ???
         for booking in self.__booking_list:
             if booking_no == booking.get_booking_no():
                 return booking
         return None
-        
+    

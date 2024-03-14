@@ -10,7 +10,7 @@ class Booking:
         self.__room_type = room_type
         self.__room_quantity = room_quantity
         self.__interval = interval   
-        self.__status = status  #arriving, cancelled, passed, staying
+        self.__status = status  #arriving, cancelled, passed
         self.__transaction = transaction
 
     def get_firstname(self):
@@ -43,13 +43,15 @@ class Booking:
     def set_transaction(self, transaction):
         if isinstance(transaction, Transaction):
             self.__transaction = transaction
-            return "Transaction Setting Successed in Booking"
+            return
         raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
                             detail = {'message':'Invalid transaction'})
-
+    
     def set_status(self, status):
-        if status == "cancelled" or status == "pending" or status == "wait_for_checkin" or status == "wait_for_checkout":
+        if status == "cancelled" or status == "arriving" or status == "passed" or status == "staying":
             self.__status = status
-            return "Booking Status Setting Success"
+            return
+        raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST,
+                            detail = {'message':'Invalid status setted'})
 
 

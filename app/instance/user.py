@@ -5,7 +5,6 @@ from ..internal.Account import Account
 from .booking import *
 from .coupon import *
 
-
 admin1_account = Account(email="admin1@gmail.com", password="admin1", role="admin")
 admin2_account = Account(email="admin2@gmail.com", password="admin2", role="admin")
 

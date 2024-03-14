@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter
 from ..instance.company import company
 from ..utils.dependency import get_current_user
 

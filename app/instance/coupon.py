@@ -1,5 +1,5 @@
-from ..internal.Coupon import Coupon
 from datetime import date
+from ..internal.Coupon import Coupon
 
 customer1_coupon1 = Coupon("1001", 500, date(2025, 1, 12))
 customer1_coupon2 = Coupon("1002", 100, date(2023, 2, 13))
