@@ -59,7 +59,7 @@ class Customer(Person):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail = {'message': 'This hotel isn\'t in favorite list'})
 
-    def search_booking_by_id(self, booking_no): #เป็นการ return ออกไปที่ api ???
+    def search_booking_by_id(self, booking_no):
         for booking in self.__booking_list:
             if booking_no == booking.get_booking_no():
                 return booking

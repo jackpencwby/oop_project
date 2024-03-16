@@ -66,6 +66,9 @@ label_my_favorite_hotel_excess = []
 label_admin_add_hotel_excess = []
 label_admin_delete_hotel_excess = []
 label_admin_cancel_booking_excess = []
+label_payment_excess = []
+label_detail_booking_excess = []
+label_choose_hotel_excess = []
 
 isclick_button_list = []
 
@@ -96,6 +99,15 @@ def backward(page, current_frame):
     for label in label_admin_cancel_booking_excess:
         label.grid_forget()
     label_admin_cancel_booking_excess.clear()
+    for label in label_payment_excess:
+        label.grid_forget()
+    label_payment_excess.clear()
+    for label in label_detail_booking_excess:
+        label.grid_forget()
+    label_detail_booking_excess.clear()
+    for label in label_choose_hotel_excess:
+        label.grid_forget()
+    label_choose_hotel_excess.clear()
 
     isclick_button_list.clear()
     
@@ -263,6 +275,27 @@ def on_click_payment_process_button():
 
     backward_button.grid(row=13,column=0,sticky='w')
 
+    label_payment_excess.append(booking_name_label)
+    label_payment_excess.append(booking_no_label)
+    label_payment_excess.append(hotel_label)
+    label_payment_excess.append(room_type_label)
+    label_payment_excess.append(amount_label)
+    label_payment_excess.append(booking_status_label)
+    label_payment_excess.append(booking_checkin_label)
+    label_payment_excess.append(booking_checkout_label)
+    label_payment_excess.append(transaction_method_label)
+    label_payment_excess.append(transaction_no_label)
+    label_payment_excess.append(transaction_status_label)
+    label_payment_excess.append(transaction_date_label)
+    label_payment_excess.append(transaction_arg1_label)
+    label_payment_excess.append(transaction_arg2_label)
+    label_payment_excess.append(transaction_arg3_label)
+    label_payment_excess.append(transaction_price_label)
+    label_payment_excess.append(transaction_coupon_id_label)
+    label_payment_excess.append(transaction_coupon_amount_label)
+    label_payment_excess.append(transaction_amount_label)
+    label_payment_excess.append(backward_button) 
+
     show_page("transaction",frame_method)
 
 def turn_json_to_coupon_list(data):
@@ -332,6 +365,7 @@ def on_click_confirm_booking_button():
 def on_click_choose_room_button(hotel_name,room_type,price):
     if current_firstname.get() == "None" and current_lastname.get() == "None":
         review_alert_label.grid(row=18,column=2,padx=30)
+        label_detail_booking_excess.append(review_alert_label)
     else:
         payload = {
             "hotel_name" : hotel_name,
@@ -368,6 +402,16 @@ def on_click_choose_room_button(hotel_name,room_type,price):
         backward_button = ttk.Button(frame_review, text="ย้อนกลับ", bootstyle="secondary", command=lambda: backward("ratelist", frame_review))
         backward_button.grid(row=7, column=2,pady=20)
 
+        label_detail_booking_excess.append(room_type_label)
+        label_detail_booking_excess.append(check_in_label)
+        label_detail_booking_excess.append(check_out_label)
+        label_detail_booking_excess.append(room_amount_label)
+        label_detail_booking_excess.append(price_pernight_label)
+        label_detail_booking_excess.append(night_amount_label)
+        label_detail_booking_excess.append(sum_price_label)
+        label_detail_booking_excess.append(confirm_button)
+        label_detail_booking_excess.append(backward_button)
+
         show_page("review",frame_ratelist)
 
 def on_click_choose_hotel_button(hotel_name,row):
@@ -382,6 +426,7 @@ def on_click_choose_hotel_button(hotel_name,row):
     
     if 'detail' in data:
         room_amount_alert_label.grid(row=row+1,column=2)
+        label_choose_hotel_excess.append(room_amount_alert_label)
     else:
         ratelist_title_label.configure(text=hotel_name)
         ratelist_title_label.grid(row=0,column=1,pady=20)
@@ -416,8 +461,16 @@ def on_click_choose_hotel_button(hotel_name,row):
             room_price_label.grid(row=current_row+1, column=2,pady=(0,60),sticky="w")
             current_row += 3
 
+            label_choose_hotel_excess.append(ratelist_title_label)
+            label_choose_hotel_excess.append(room_image_label)
+            label_choose_hotel_excess.append(room_type_label)
+            label_choose_hotel_excess.append(room_price_label)
+            label_choose_hotel_excess.append(choose_button)
+
         backward_button = ttk.Button(frame_ratelist, text="ย้อนกลับ", bootstyle="secondary", command=lambda: backward("search_hotel", frame_ratelist))
         backward_button.grid(row=20, column=1, pady=100)
+
+        label_choose_hotel_excess.append(backward_button)
 
         show_page("ratelist",frame_hotel)
         

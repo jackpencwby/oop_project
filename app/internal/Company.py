@@ -116,19 +116,19 @@ class Company:
                                             content={"firstname": booking.get_firstname(),
                                                      "lastname": booking.get_lastname(),
                                                      "booking_no": booking.get_booking_no(),
-                                                     "hotel":  {"hotel_name": booking.get_hotel().get_name(),
-                                                                "location":{"country": booking.get_hotel().get_location().get_country(), 
+                                                     "hotel":  {"hotel_name": booking.get_hotel(). get_name(),
+                                                                 "location":{"country": booking.get_hotel().get_location().get_country(), 
                                                                             "province": booking.get_hotel().get_location().get_province()}},
                                                      "room_type": booking.get_room_type(),
-                                                     "room_quantity": booking.get_room_quantity(),
+                                                      "room_quantity": booking.get_room_quantity(),
                                                      "check_in_date": booking.get_interval().get_begin_date().strftime("%A %d %B %Y"),
                                                      "check_out_date": booking.get_interval().get_end_date().strftime("%A %d %B %Y"),
-                                                     "status": booking.get_status()})
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
-                                    detail={"message": "No booking Information"}) 
+                                                     "status": booking.get_status()}) 
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,  
+                                    detail={"message": "No booking Information"})  
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail={"message": "Firstname and Surname doesn't exist"})
-    
+                            detail={"message": "Firstname and Surname doesn't exist"})  
+     
     def get_personal_information(self, current_user):
         if(current_user == None): 
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
@@ -150,17 +150,17 @@ class Company:
         if(isinstance(current_user, Admin)):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
                                 detail={"message": "Admin doesn\'t have booking"})
-        arriving = []
-        cancelled = []
+        arriving = [] 
+        cancelled = [] 
         for booking in current_user.get_booking_list():
             if(booking.get_status() == "arriving"):
                 arriving.append({"firstname": booking.get_firstname(),
                                  "lastname": booking.get_lastname(),
                                  "booking_no": booking.get_booking_no(),
                                  "hotel": {"hotel_name": booking.get_hotel().get_name(),
-                                           "location": {"country": booking.get_hotel().get_location().get_country(), 
+                                            "location": {"country": booking.get_hotel().get_location().get_country(), 
                                                         "province": booking.get_hotel().get_location().get_province()}},
-                                 "room_type": booking.get_room_type(),
+                                 "room_type": booking.get_room_type(), 
                                  "room_quantity": booking.get_room_quantity(),
                                  "check_in_date": booking.get_interval().get_begin_date().strftime("%A %d %B %Y"),
                                  "check_out_date": booking.get_interval().get_end_date().strftime("%A %d %B %Y")})
@@ -177,8 +177,8 @@ class Company:
                                  "check_out_date": booking.get_interval().get_end_date().strftime("%A %d %B %Y")})
         return JSONResponse(status_code=status.HTTP_200_OK, 
                             content={"arriving": arriving, 
-                                     "cancelled": cancelled})
-
+                                     "cancelled": cancelled})  
+ 
     def get_my_favorite_hotel(self, current_user):
         if(current_user == None or not isinstance(current_user, Customer)):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, 
@@ -465,6 +465,19 @@ class Company:
 
         return JSONResponse(status_code=status.HTTP_200_OK,
                             content = json)
+    
+    def cancel_booking(self, booking_no, current_user):
+        if(current_user == None):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"message": "Please login first"})
+        if not isinstance(booking_no, str) or len(booking_no) != 3:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "Invalid booking number"})
+        if isinstance(current_user, Customer):
+            booking = current_user.search_booking_by_id(booking_no)
+            if booking:
+                booking.set_status('cancelled')
+                booking.get_hotel().cancel_room(booking)
+                return JSONResponse(status_code=status.HTTP_200_OK, content={'message':"Cancel booking successfully"})
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "No booking_id matched"})
 
     def add_hotel(self, hotel, current_user):
         if(current_user != None):
@@ -488,20 +501,7 @@ class Company:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "Invalid hotel name"})
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"message": "You are not an admin"})
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"message": "Please login first"})
-                
-    def cancel_booking(self, booking_no, current_user):
-        if(current_user == None):
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"message": "Please login first"})
-        if not isinstance(booking_no, str) or len(booking_no) != 3:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "Invalid booking number"})
-        if isinstance(current_user, Customer):
-            booking = current_user.search_booking_by_id(booking_no)
-            if booking:
-                booking.set_status('cancelled')
-                booking.get_hotel().cancel_room(booking)
-                return JSONResponse(status_code=status.HTTP_200_OK, content={'message':"Cancel booking successfully"})
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "No booking_id matched"})
-
+ 
     def admin_cancel_booking(self, booking_no, current_user):
         if(current_user != None):
             if isinstance(current_user, Admin):
@@ -516,4 +516,4 @@ class Company:
                     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "This booking number does not exist"})
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"message": "Invalid booking number"})
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"message": "You are not an admin"})
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"message": "Please login first"})
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"message": "Please login first"})  
